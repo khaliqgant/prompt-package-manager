@@ -17,7 +17,7 @@
 ##### 1. Home Page Tests (`e2e/home.spec.ts`) - 8 tests
 - ✓ Display hero section with PRPM branding
 - ✓ Working GitHub and Claim Invite CTAs
-- ✓ Display all 6 feature cards (1,042+ Packages, CLI Tool, Search & Discover, Collections, Verified Authors, Version Control)
+- ✓ Display all 6 feature cards (1,500+ Packages, CLI Tool, Search & Discover, Collections, Verified Authors, Version Control)
 - ✓ Navigate to authors page when clicking Verified Authors card
 - ✓ Display Quick Start section with CLI commands
 - ✓ Display supported AI tools section (Cursor, Claude, Continue, Windsurf, Generic)

@@ -8,7 +8,8 @@ import type {
   ClaimInviteResponse,
   Author,
   TopAuthorsResponse,
-  PackageType,
+  Format,
+  Subtype,
   SortType,
   SearchPackagesParams,
   Package,
@@ -25,7 +26,8 @@ export type {
   ClaimInviteResponse,
   Author,
   TopAuthorsResponse,
-  PackageType,
+  Format,
+  Subtype,
   SortType,
   SearchPackagesParams,
   Package,
@@ -192,11 +194,18 @@ export async function searchPackages(params: SearchPackagesParams): Promise<Sear
   const queryParams = new URLSearchParams()
 
   if (params.q) queryParams.append('q', params.q)
-  if (params.type) {
-    if (Array.isArray(params.type)) {
-      params.type.forEach((t: string) => queryParams.append('type', t))
+  if (params.format) {
+    if (Array.isArray(params.format)) {
+      params.format.forEach((f: string) => queryParams.append('format', f))
     } else {
-      queryParams.append('type', params.type)
+      queryParams.append('format', params.format)
+    }
+  }
+  if (params.subtype) {
+    if (Array.isArray(params.subtype)) {
+      params.subtype.forEach((s: string) => queryParams.append('subtype', s))
+    } else {
+      queryParams.append('subtype', params.subtype)
     }
   }
   if (params.tags) params.tags.forEach((tag: string) => queryParams.append('tags', tag))
@@ -250,10 +259,11 @@ export async function searchCollections(params: SearchCollectionsParams): Promis
 /**
  * Get trending packages
  */
-export async function getTrendingPackages(type?: PackageType, limit: number = 20) {
+export async function getTrendingPackages(options?: { format?: Format; subtype?: Subtype; limit?: number }) {
   const queryParams = new URLSearchParams()
-  if (type) queryParams.append('type', type)
-  queryParams.append('limit', String(limit))
+  if (options?.format) queryParams.append('format', options.format)
+  if (options?.subtype) queryParams.append('subtype', options.subtype)
+  queryParams.append('limit', String(options?.limit || 20))
 
   const response = await fetch(`${REGISTRY_URL}/api/v1/search/trending?${queryParams.toString()}`)
 
@@ -268,10 +278,11 @@ export async function getTrendingPackages(type?: PackageType, limit: number = 20
 /**
  * Get featured packages
  */
-export async function getFeaturedPackages(type?: PackageType, limit: number = 20) {
+export async function getFeaturedPackages(options?: { format?: Format; subtype?: Subtype; limit?: number }) {
   const queryParams = new URLSearchParams()
-  if (type) queryParams.append('type', type)
-  queryParams.append('limit', String(limit))
+  if (options?.format) queryParams.append('format', options.format)
+  if (options?.subtype) queryParams.append('subtype', options.subtype)
+  queryParams.append('limit', String(options?.limit || 20))
 
   const response = await fetch(`${REGISTRY_URL}/api/v1/search/featured?${queryParams.toString()}`)
 

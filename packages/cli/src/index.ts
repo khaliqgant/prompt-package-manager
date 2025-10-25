@@ -22,6 +22,7 @@ import { createOutdatedCommand } from './commands/outdated';
 import { createUpdateCommand } from './commands/update';
 import { createUpgradeCommand } from './commands/upgrade';
 import { createSchemaCommand } from './commands/schema';
+import { createInitCommand } from './commands/init';
 import { telemetry } from './core/telemetry';
 
 const program = new Command();
@@ -30,6 +31,9 @@ program
   .name('prpm')
   .description('Prompt Package Manager - Install and manage prompt-based files')
   .version('0.0.1');
+
+// Package creation commands
+program.addCommand(createInitCommand());
 
 // Registry commands (new)
 program.addCommand(createSearchCommand());

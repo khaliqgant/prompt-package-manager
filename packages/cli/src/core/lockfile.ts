@@ -12,8 +12,8 @@ export interface LockfilePackage {
   resolved: string; // Tarball URL
   integrity: string; // SHA-256 hash
   dependencies?: Record<string, string>;
-  type?: string;
   format?: string;
+  subtype?: string;
   installedPath?: string; // Path where the package was installed
 }
 
@@ -81,8 +81,8 @@ export function addToLockfile(
     version: string;
     tarballUrl: string;
     dependencies?: Record<string, string>;
-    type?: string;
     format?: string;
+    subtype?: string;
     installedPath?: string;
   }
 ): void {
@@ -91,8 +91,8 @@ export function addToLockfile(
     resolved: packageInfo.tarballUrl,
     integrity: '', // Will be set after download
     dependencies: packageInfo.dependencies,
-    type: packageInfo.type,
     format: packageInfo.format,
+    subtype: packageInfo.subtype,
     installedPath: packageInfo.installedPath,
   };
   lockfile.generated = new Date().toISOString();
@@ -251,8 +251,8 @@ export async function addPackage(packageInfo: {
   version: string;
   tarballUrl: string;
   dependencies?: Record<string, string>;
-  type?: string;
   format?: string;
+  subtype?: string;
   installedPath?: string;
 }): Promise<void> {
   const lockfile = (await readLockfile()) || createLockfile();
@@ -260,8 +260,8 @@ export async function addPackage(packageInfo: {
     version: packageInfo.version,
     tarballUrl: packageInfo.tarballUrl,
     dependencies: packageInfo.dependencies,
-    type: packageInfo.type,
     format: packageInfo.format,
+    subtype: packageInfo.subtype,
     installedPath: packageInfo.installedPath,
   });
   await writeLockfile(lockfile);

@@ -121,7 +121,7 @@ describe('install command - multi-file packages', () => {
       const mockPackage = {
         id: 'test-skill',
         name: 'test-skill',
-        type: 'claude-skill',
+        format: 'claude', subtype: 'skill',
         tags: [],
         total_downloads: 100,
         verified: true,
@@ -150,7 +150,7 @@ describe('install command - multi-file packages', () => {
       const mockPackage = {
         id: 'complex-skill',
         name: 'complex-skill',
-        type: 'claude-skill',
+        format: 'claude', subtype: 'skill',
         tags: [],
         total_downloads: 100,
         verified: true,
@@ -191,7 +191,7 @@ describe('install command - multi-file packages', () => {
       const mockPackage = {
         id: 'complex-agent',
         name: 'complex-agent',
-        type: 'claude-agent',
+        format: 'claude', subtype: 'agent',
         tags: [],
         total_downloads: 50,
         verified: true,
@@ -231,7 +231,7 @@ describe('install command - multi-file packages', () => {
       const mockPackage = {
         id: 'complex-command',
         name: 'complex-command',
-        type: 'claude-slash-command',
+        format: 'claude', subtype: 'slash-command',
         tags: [],
         total_downloads: 75,
         verified: true,
@@ -266,7 +266,7 @@ describe('install command - multi-file packages', () => {
       const mockPackage = {
         id: 'complex-skill',
         name: 'complex-skill',
-        type: 'claude-skill',
+        format: 'claude', subtype: 'skill',
         tags: [],
         total_downloads: 100,
         verified: true,
@@ -304,7 +304,7 @@ describe('install command - multi-file packages', () => {
       const mockPackage = {
         id: 'legacy-skill',
         name: 'legacy-skill',
-        type: 'claude-skill',
+        format: 'claude', subtype: 'skill',
         tags: [],
         total_downloads: 100,
         verified: true,

@@ -5,7 +5,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { query } from '../db/index.js';
 import { cacheGet, cacheSet } from '../cache/redis.js';
-import { Package, PackageType } from '../types.js';
+import { Package, Format, Subtype } from '../types.js';
 import { getSearchProvider } from '../search/index.js';
 
 export async function searchRoutes(server: FastifyInstance) {
@@ -13,15 +13,21 @@ export async function searchRoutes(server: FastifyInstance) {
   server.get('/', {
     schema: {
       tags: ['search'],
-      description: 'Search packages by name, description, tags, or keywords. Query optional when using type filter.',
+      description: 'Search packages by name, description, tags, or keywords. Query optional when using format/subtype filter.',
       querystring: {
         type: 'object',
         properties: {
           q: { type: 'string' },
-          type: {
+          format: {
             anyOf: [
-              { type: 'string', enum: ['cursor', 'cursor-agent', 'cursor-slash-command', 'claude', 'claude-skill', 'claude-agent', 'claude-slash-command', 'continue', 'windsurf', 'generic', 'mcp'] },
-              { type: 'array', items: { type: 'string', enum: ['cursor', 'cursor-agent', 'cursor-slash-command', 'claude', 'claude-skill', 'claude-agent', 'claude-slash-command', 'continue', 'windsurf', 'generic', 'mcp'] } }
+              { type: 'string', enum: ['cursor', 'claude', 'continue', 'windsurf', 'copilot', 'kiro', 'generic', 'mcp'] },
+              { type: 'array', items: { type: 'string', enum: ['cursor', 'claude', 'continue', 'windsurf', 'copilot', 'kiro', 'generic', 'mcp'] } }
+            ]
+          },
+          subtype: {
+            anyOf: [
+              { type: 'string', enum: ['rule', 'agent', 'skill', 'slash-command', 'prompt', 'workflow', 'tool', 'template', 'collection'] },
+              { type: 'array', items: { type: 'string', enum: ['rule', 'agent', 'skill', 'slash-command', 'prompt', 'workflow', 'tool', 'template', 'collection'] } }
             ]
           },
           tags: { type: 'array', items: { type: 'string' } },
@@ -29,7 +35,6 @@ export async function searchRoutes(server: FastifyInstance) {
           author: { type: 'string' },
           verified: { type: 'boolean' },
           featured: { type: 'boolean' },
-          hasSlashCommands: { type: 'boolean', description: 'Filter for packages with slash commands (claude-slash-command type)' },
           limit: { type: 'number', default: 20, minimum: 1, maximum: 100 },
           offset: { type: 'number', default: 0, minimum: 0 },
           sort: { type: 'string', enum: ['downloads', 'created', 'updated', 'quality', 'rating'], default: 'downloads' },
@@ -37,25 +42,19 @@ export async function searchRoutes(server: FastifyInstance) {
       },
     },
   }, async (request: FastifyRequest, reply: FastifyReply) => {
-    const { q, type, tags, category, author, verified, featured, hasSlashCommands, limit = 20, offset = 0, sort = 'downloads' } = request.query as {
+    const { q, format, subtype, tags, category, author, verified, featured, limit = 20, offset = 0, sort = 'downloads' } = request.query as {
       q?: string;
-      type?: PackageType | PackageType[];
+      format?: Format | Format[];
+      subtype?: Subtype | Subtype[];
       tags?: string[];
       category?: string;
       author?: string;
       verified?: boolean;
       featured?: boolean;
-      hasSlashCommands?: boolean;
       limit?: number;
       offset?: number;
       sort?: 'downloads' | 'created' | 'updated' | 'quality' | 'rating';
     };
-
-    // Allow browsing all packages if no filters provided
-    // This enables the search page to show all packages by default
-
-    // If hasSlashCommands is true, override type to claude-slash-command
-    const effectiveType = hasSlashCommands === true ? 'claude-slash-command' : type;
 
     // Build cache key
     const cacheKey = `search:${JSON.stringify(request.query)}`;
@@ -69,7 +68,8 @@ export async function searchRoutes(server: FastifyInstance) {
     // Use search provider (PostgreSQL or OpenSearch)
     const searchProvider = getSearchProvider(server);
     const response = await searchProvider.search(q || '', {
-      type: effectiveType,
+      format,
+      subtype,
       tags,
       category,
       author,
@@ -94,18 +94,20 @@ export async function searchRoutes(server: FastifyInstance) {
       querystring: {
         type: 'object',
         properties: {
-          type: { type: 'string', enum: ['cursor', 'claude', 'claude-skill', 'claude-agent', 'claude-slash-command', 'cursor-agent', 'cursor-slash-command', 'continue', 'windsurf', 'generic', 'mcp'] },
+          format: { type: 'string', enum: ['cursor', 'claude', 'continue', 'windsurf', 'copilot', 'kiro', 'generic', 'mcp'] },
+          subtype: { type: 'string', enum: ['rule', 'agent', 'skill', 'slash-command', 'prompt', 'workflow', 'tool', 'template', 'collection'] },
           limit: { type: 'number', default: 20, minimum: 1, maximum: 100 },
         },
       },
     },
   }, async (request: FastifyRequest, reply: FastifyReply) => {
-    const { type, limit = 20 } = request.query as {
-      type?: string;
+    const { format, subtype, limit = 20 } = request.query as {
+      format?: string;
+      subtype?: string;
       limit?: number;
     };
 
-    const cacheKey = `search:trending:${type || 'all'}:${limit}`;
+    const cacheKey = `search:trending:${format || 'all'}:${subtype || 'all'}:${limit}`;
     const cached = await cacheGet<any>(server, cacheKey);
     if (cached) {
       return cached;
@@ -113,10 +115,16 @@ export async function searchRoutes(server: FastifyInstance) {
 
     const conditions: string[] = ["visibility = 'public'"];
     const params: unknown[] = [];
+    let paramIndex = 1;
 
-    if (type) {
-      conditions.push('type = $1');
-      params.push(type);
+    if (format) {
+      conditions.push(`format = $${paramIndex++}`);
+      params.push(format);
+    }
+
+    if (subtype) {
+      conditions.push(`subtype = $${paramIndex++}`);
+      params.push(subtype);
     }
 
     const whereClause = conditions.join(' AND ');
@@ -146,18 +154,20 @@ export async function searchRoutes(server: FastifyInstance) {
       querystring: {
         type: 'object',
         properties: {
-          type: { type: 'string', enum: ['cursor', 'claude', 'claude-skill', 'claude-agent', 'claude-slash-command', 'cursor-agent', 'cursor-slash-command', 'continue', 'windsurf', 'generic', 'mcp'] },
+          format: { type: 'string', enum: ['cursor', 'claude', 'continue', 'windsurf', 'copilot', 'kiro', 'generic', 'mcp'] },
+          subtype: { type: 'string', enum: ['rule', 'agent', 'skill', 'slash-command', 'prompt', 'workflow', 'tool', 'template', 'collection'] },
           limit: { type: 'number', default: 20, minimum: 1, maximum: 100 },
         },
       },
     },
   }, async (request: FastifyRequest, reply: FastifyReply) => {
-    const { type, limit = 20 } = request.query as {
-      type?: string;
+    const { format, subtype, limit = 20 } = request.query as {
+      format?: string;
+      subtype?: string;
       limit?: number;
     };
 
-    const cacheKey = `search:featured:${type || 'all'}:${limit}`;
+    const cacheKey = `search:featured:${format || 'all'}:${subtype || 'all'}:${limit}`;
     const cached = await cacheGet<any>(server, cacheKey);
     if (cached) {
       return cached;
@@ -165,10 +175,16 @@ export async function searchRoutes(server: FastifyInstance) {
 
     const conditions: string[] = ["visibility = 'public'", 'featured = TRUE'];
     const params: unknown[] = [];
+    let paramIndex = 1;
 
-    if (type) {
-      conditions.push('type = $1');
-      params.push(type);
+    if (format) {
+      conditions.push(`format = $${paramIndex++}`);
+      params.push(format);
+    }
+
+    if (subtype) {
+      conditions.push(`subtype = $${paramIndex++}`);
+      params.push(subtype);
     }
 
     const whereClause = conditions.join(' AND ');

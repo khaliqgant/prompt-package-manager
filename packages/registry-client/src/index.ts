@@ -9,7 +9,8 @@ export type {
   RegistryConfig
 } from './registry-client';
 export type {
-  PackageType,
+  Format,
+  Subtype,
   Package,
   Config,
   AddOptions,

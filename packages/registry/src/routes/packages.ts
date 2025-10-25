@@ -27,7 +27,8 @@ export async function packageRoutes(server: FastifyInstance) {
         type: 'object',
         properties: {
           search: { type: 'string' },
-          type: { type: 'string', enum: ['cursor', 'cursor-agent', 'cursor-slash-command', 'claude', 'claude-skill', 'claude-agent', 'claude-slash-command', 'continue', 'windsurf', 'generic', 'mcp'] },
+          format: { type: 'string', enum: ['cursor', 'claude', 'continue', 'windsurf', 'copilot', 'kiro', 'agents.md', 'generic', 'mcp'] },
+          subtype: { type: 'string', enum: ['rule', 'agent', 'skill', 'slash-command', 'prompt', 'workflow', 'tool', 'template', 'collection'] },
           category: { type: 'string' },
           featured: { type: 'boolean' },
           verified: { type: 'boolean' },
@@ -38,11 +39,11 @@ export async function packageRoutes(server: FastifyInstance) {
       },
     },
   }, async (request: FastifyRequest<{ Querystring: ListPackagesQuery }>, reply: FastifyReply) => {
-    const { search, type, category, featured, verified, sort = 'downloads', limit = 20, offset = 0 } = request.query;
+    const { search, format, subtype, category, featured, verified, sort = 'downloads', limit = 20, offset = 0 } = request.query;
 
     server.log.info({
       action: 'list_packages',
-      filters: { search, type, category, featured, verified },
+      filters: { search, format, subtype, category, featured, verified },
       sort,
       pagination: { limit, offset }
     }, '📦 Listing packages');
@@ -62,9 +63,14 @@ export async function packageRoutes(server: FastifyInstance) {
     const params: unknown[] = [];
     let paramIndex = 1;
 
-    if (type) {
-      conditions.push(`type = $${paramIndex++}`);
-      params.push(type);
+    if (format) {
+      conditions.push(`format = $${paramIndex++}`);
+      params.push(format);
+    }
+
+    if (subtype) {
+      conditions.push(`subtype = $${paramIndex++}`);
+      params.push(subtype);
     }
 
     if (category) {
@@ -378,12 +384,13 @@ export async function packageRoutes(server: FastifyInstance) {
       const packageName = manifest.name as string;
       const version = manifest.version as string;
       const description = manifest.description as string;
-      const type = manifest.type as string;
+      const format = manifest.format as string;
+      const subtype = manifest.subtype as string;
 
-      if (!packageName || !version || !description || !type) {
+      if (!packageName || !version || !description || !format) {
         return reply.status(400).send({
           error: 'Invalid manifest',
-          message: 'Missing required fields: name, version, description, or type'
+          message: 'Missing required fields: name, version, description, or format'
         });
       }
 
@@ -436,10 +443,10 @@ export async function packageRoutes(server: FastifyInstance) {
         // New package - create it
         pkg = await queryOne<Package>(
           server,
-          `INSERT INTO packages (name, description, author_id, type)
-           VALUES ($1, $2, $3, $4)
+          `INSERT INTO packages (name, description, author_id, format, subtype)
+           VALUES ($1, $2, $3, $4, $5)
            RETURNING *`,
-          [packageName, description, userId, type]
+          [packageName, description, userId, format, subtype]
         );
 
         if (!pkg) {
@@ -665,17 +672,19 @@ export async function packageRoutes(server: FastifyInstance) {
         type: 'object',
         properties: {
           limit: { type: 'number', default: 20, minimum: 1, maximum: 100 },
-          type: { type: 'string', enum: ['cursor', 'cursor-agent', 'cursor-slash-command', 'claude', 'claude-skill', 'claude-agent', 'claude-slash-command', 'continue', 'windsurf', 'generic', 'mcp'] },
+          format: { type: 'string', enum: ['cursor', 'claude', 'continue', 'windsurf', 'copilot', 'kiro', 'agents.md', 'generic', 'mcp'] },
+          subtype: { type: 'string', enum: ['rule', 'agent', 'skill', 'slash-command', 'prompt', 'workflow', 'tool', 'template', 'collection'] },
         },
       },
     },
   }, async (request: FastifyRequest, reply: FastifyReply) => {
-    const { limit = 20, type } = request.query as {
+    const { limit = 20, format, subtype } = request.query as {
       limit?: number;
-      type?: string;
+      format?: string;
+      subtype?: string;
     };
 
-    const cacheKey = `packages:popular:${limit}:${type || 'all'}`;
+    const cacheKey = `packages:popular:${limit}:${format || 'all'}:${subtype || 'all'}`;
     const cached = await cacheGet(server, cacheKey);
     if (cached) {
       return cached;
@@ -685,9 +694,14 @@ export async function packageRoutes(server: FastifyInstance) {
     const params: unknown[] = [limit];
     let paramIndex = 2;
 
-    if (type) {
-      conditions.push(`type = $${paramIndex++}`);
-      params.push(type);
+    if (format) {
+      conditions.push(`format = $${paramIndex++}`);
+      params.push(format);
+    }
+
+    if (subtype) {
+      conditions.push(`subtype = $${paramIndex++}`);
+      params.push(subtype);
     }
 
     const whereClause = conditions.join(' AND ');

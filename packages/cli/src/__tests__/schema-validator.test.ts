@@ -11,7 +11,8 @@ describe('schema-validator', () => {
         name: 'test-package',
         version: '1.0.0',
         description: 'A test package with sufficient description length',
-        type: 'claude-skill',
+        format: 'claude',
+        subtype: 'skill',
         files: ['skill.md', 'README.md'],
       };
 
@@ -25,7 +26,8 @@ describe('schema-validator', () => {
         name: '@username/test-package',
         version: '1.0.0',
         description: 'A scoped package with sufficient description',
-        type: 'cursor',
+        format: 'cursor',
+        subtype: 'rule',
         files: ['rule.mdc'],
       };
 
@@ -38,17 +40,20 @@ describe('schema-validator', () => {
         name: '@username/enhanced',
         version: '1.0.0',
         description: 'Enhanced package with file metadata',
-        type: 'cursor',
+        format: 'cursor',
+        subtype: 'rule',
         files: [
           {
             path: '.cursor/rules/react.mdc',
-            type: 'cursor',
+            format: 'cursor',
+            subtype: 'rule',
             name: 'React Rules',
             tags: ['react', 'typescript'],
           },
           {
             path: '.cursor/rules/python.mdc',
-            type: 'cursor',
+            format: 'cursor',
+            subtype: 'rule',
             name: 'Python Rules',
             tags: ['python'],
           },
@@ -64,15 +69,18 @@ describe('schema-validator', () => {
         name: '@test/collection',
         version: '1.0.0',
         description: 'Collection with multiple types',
-        type: 'collection',
+        format: 'generic',
+        subtype: 'collection',
         files: [
           {
             path: '.claude/skills/skill.md',
-            type: 'claude-skill',
+            format: 'claude',
+            subtype: 'skill',
           },
           {
             path: '.claude/agents/agent.md',
-            type: 'claude-agent',
+            format: 'claude',
+            subtype: 'agent',
           },
         ],
       };
@@ -86,7 +94,8 @@ describe('schema-validator', () => {
         name: '@username/full-package',
         version: '1.0.0',
         description: 'Full package with all fields populated',
-        type: 'claude-skill',
+        format: 'claude',
+        subtype: 'skill',
         author: {
           name: 'Test Author',
           email: 'test@example.com',
@@ -122,7 +131,8 @@ describe('schema-validator', () => {
         name: 'test',
         version: '1.0.0-beta.1',
         description: 'Prerelease version test package',
-        type: 'claude',
+        format: 'claude',
+        subtype: 'rule',
         files: ['file.md'],
       };
 
@@ -135,7 +145,8 @@ describe('schema-validator', () => {
         name: 'test',
         version: '1.0.0',
         description: 'Package with string author',
-        type: 'claude',
+        format: 'claude',
+        subtype: 'rule',
         author: 'John Doe',
         files: ['file.md'],
       };
@@ -150,7 +161,7 @@ describe('schema-validator', () => {
       const manifest = {
         name: 'test',
         version: '1.0.0',
-        // missing description and type
+        // missing description and format
       };
 
       const result = validateManifestSchema(manifest);
@@ -164,7 +175,8 @@ describe('schema-validator', () => {
         name: 'TestPackage',
         version: '1.0.0',
         description: 'Invalid package name with uppercase',
-        type: 'claude',
+        format: 'claude',
+        subtype: 'rule',
         files: ['file.md'],
       };
 
@@ -178,7 +190,8 @@ describe('schema-validator', () => {
         name: 'test package',
         version: '1.0.0',
         description: 'Invalid package name with spaces',
-        type: 'claude',
+        format: 'claude',
+        subtype: 'rule',
         files: ['file.md'],
       };
 
@@ -191,7 +204,8 @@ describe('schema-validator', () => {
         name: 'test',
         version: '1.0',
         description: 'Invalid version number format',
-        type: 'claude',
+        format: 'claude',
+        subtype: 'rule',
         files: ['file.md'],
       };
 
@@ -205,7 +219,8 @@ describe('schema-validator', () => {
         name: 'test',
         version: '1.0.0',
         description: 'Too short',
-        type: 'claude',
+        format: 'claude',
+        subtype: 'rule',
         files: ['file.md'],
       };
 
@@ -214,18 +229,19 @@ describe('schema-validator', () => {
       expect(result.errors?.some(e => e.includes('description'))).toBe(true);
     });
 
-    it('should reject invalid type', () => {
+    it('should reject invalid format', () => {
       const manifest = {
         name: 'test',
         version: '1.0.0',
-        description: 'Package with invalid type',
-        type: 'invalid-type',
+        description: 'Package with invalid format',
+        format: 'invalid-format',
+        subtype: 'rule',
         files: ['file.md'],
       };
 
       const result = validateManifestSchema(manifest);
       expect(result.valid).toBe(false);
-      expect(result.errors?.some(e => e.includes('type'))).toBe(true);
+      expect(result.errors?.some(e => e.includes('format'))).toBe(true);
     });
 
     it('should reject empty files array', () => {
@@ -233,7 +249,8 @@ describe('schema-validator', () => {
         name: 'test',
         version: '1.0.0',
         description: 'Package with empty files array',
-        type: 'claude',
+        format: 'claude',
+        subtype: 'rule',
         files: [],
       };
 
@@ -247,10 +264,12 @@ describe('schema-validator', () => {
         name: 'test',
         version: '1.0.0',
         description: 'Package with invalid file object',
-        type: 'cursor',
+        format: 'cursor',
+        subtype: 'rule',
         files: [
           {
-            type: 'cursor',
+            format: 'cursor',
+            subtype: 'rule',
             name: 'Missing path',
           },
         ],
@@ -260,16 +279,17 @@ describe('schema-validator', () => {
       expect(result.valid).toBe(false);
     });
 
-    it('should reject file object missing required type field', () => {
+    it('should reject file object missing required format field', () => {
       const manifest = {
         name: 'test',
         version: '1.0.0',
         description: 'Package with invalid file object',
-        type: 'cursor',
+        format: 'cursor',
+        subtype: 'rule',
         files: [
           {
             path: 'file.mdc',
-            name: 'Missing type',
+            name: 'Missing format',
           },
         ],
       };
@@ -278,16 +298,18 @@ describe('schema-validator', () => {
       expect(result.valid).toBe(false);
     });
 
-    it('should reject file object with invalid type', () => {
+    it('should reject file object with invalid format', () => {
       const manifest = {
         name: 'test',
         version: '1.0.0',
-        description: 'Package with invalid file type',
-        type: 'cursor',
+        description: 'Package with invalid file format',
+        format: 'cursor',
+        subtype: 'rule',
         files: [
           {
             path: 'file.mdc',
-            type: 'invalid-type',
+            format: 'invalid-format',
+            subtype: 'rule',
           },
         ],
       };
@@ -301,7 +323,8 @@ describe('schema-validator', () => {
         name: 'test',
         version: '1.0.0',
         description: 'Package with invalid email',
-        type: 'claude',
+        format: 'claude',
+        subtype: 'rule',
         author: {
           name: 'Test',
           email: 'not-an-email',
@@ -319,7 +342,8 @@ describe('schema-validator', () => {
         name: 'test',
         version: '1.0.0',
         description: 'Package with too many tags',
-        type: 'claude',
+        format: 'claude',
+        subtype: 'rule',
         tags: Array(11).fill('tag'), // 11 tags, max is 10
         files: ['file.md'],
       };
@@ -333,7 +357,8 @@ describe('schema-validator', () => {
         name: 'test',
         version: '1.0.0',
         description: 'Package with too many keywords',
-        type: 'claude',
+        format: 'claude',
+        subtype: 'rule',
         keywords: Array(21).fill('keyword'), // 21 keywords, max is 20
         files: ['file.md'],
       };
@@ -347,7 +372,8 @@ describe('schema-validator', () => {
         name: 'test',
         version: '1.0.0',
         description: 'Package with invalid URL',
-        type: 'claude',
+        format: 'claude',
+        subtype: 'rule',
         repository: 'not-a-url',
         files: ['file.md'],
       };

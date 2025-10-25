@@ -46,7 +46,7 @@ export async function handleInfo(packageName: string): Promise<void> {
     }
 
     // Type
-    console.log(`\n📂 Type: ${pkg.type}`);
+    console.log(`\n📂 Type: ${`${pkg.format || 'unknown'} ${pkg.subtype || 'unknown'}`}`);
 
     // Installation
     console.log('\n💻 Installation:');

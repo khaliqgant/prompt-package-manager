@@ -69,53 +69,60 @@ export function toCursor(
 /**
  * Generate MDC (Model Context) header for Cursor rules
  * Format: YAML frontmatter with metadata
- * Config values take precedence over package metadata
+ *
+ * According to official Cursor docs (https://cursor.com/docs/context/rules),
+ * only these fields are officially supported:
+ * - description (optional but recommended)
+ * - globs (array of file patterns)
+ * - alwaysApply (boolean)
+ *
+ * PRPM extension fields (title, tags, version) are included as comments
+ * for round-trip conversion support but are ignored by Cursor.
  */
 function generateMDCHeader(pkg: CanonicalPackage, config?: CursorMDCConfig): string {
   const lines: string[] = ['---'];
 
-  // Name/title (from package metadata, not configurable)
-  if (pkg.metadata?.title) {
-    lines.push(`name: "${pkg.metadata.title}"`);
-  } else if (pkg.id) {
-    lines.push(`name: "${pkg.id}"`);
-  }
-
-  // Description (from package metadata, not configurable)
+  // Description (officially supported - should always be provided)
   if (pkg.metadata?.description) {
     lines.push(`description: "${pkg.metadata.description}"`);
   }
 
-  // Version - config takes precedence
-  const version = config?.version || pkg.metadata?.version || '1.0.0';
-  lines.push(`version: "${version}"`);
-
-  // Globs - config takes precedence
-  const globs = config?.globs || (pkg.metadata?.globs as string[] | undefined) || ['**/*'];
-  lines.push('globs:');
-  globs.forEach(glob => {
-    lines.push(`  - "${glob}"`);
-  });
-
-  // Always apply flag - config takes precedence
-  const alwaysApply = config?.alwaysApply ?? pkg.metadata?.alwaysApply ?? false;
-
-  // Rule type - determines when the rule is applied
-  const ruleType = alwaysApply ? 'always' : 'on-demand';
-  lines.push(`ruleType: ${ruleType}`);
-  lines.push(`alwaysApply: ${alwaysApply}`);
-
-  // Author - from config if provided
-  if (config?.author) {
-    lines.push(`author: "${config.author}"`);
+  // Globs (officially supported - file patterns to match)
+  const globs = config?.globs || (pkg.metadata?.globs as string[] | undefined);
+  if (globs && globs.length > 0) {
+    lines.push('globs:');
+    globs.forEach(glob => {
+      lines.push(`  - "${glob}"`);
+    });
   }
 
-  // Tags - from config if provided
-  if (config?.tags && config.tags.length > 0) {
-    lines.push('tags:');
-    config.tags.forEach(tag => {
-      lines.push(`  - "${tag}"`);
+  // Always apply flag (officially supported)
+  const alwaysApply = config?.alwaysApply ?? pkg.metadata?.alwaysApply ?? false;
+  lines.push(`alwaysApply: ${alwaysApply}`);
+
+  // PRPM extension fields (not used by Cursor, but included for round-trip conversion)
+  // These are commented out to avoid confusion
+  const title = pkg.metadata?.title || pkg.id;
+  if (title) {
+    lines.push(`# title: "${title}"`);
+  }
+
+  const version = config?.version || pkg.metadata?.version;
+  if (version) {
+    lines.push(`# version: "${version}"`);
+  }
+
+  const tags = config?.tags;
+  if (tags && tags.length > 0) {
+    lines.push('# tags:');
+    tags.forEach(tag => {
+      lines.push(`#   - "${tag}"`);
     });
+  }
+
+  const author = config?.author;
+  if (author) {
+    lines.push(`# author: "${author}"`);
   }
 
   lines.push('---');

@@ -38,7 +38,7 @@ npm run test:e2e
 
 ### Mode 2: Real API
 - Tests against actual registry backend
-- Real data (1,042+ packages)
+- Real data (1,500+ packages)
 - Requires registry running
 
 ```bash

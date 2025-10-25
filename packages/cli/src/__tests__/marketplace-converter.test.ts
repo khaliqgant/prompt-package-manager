@@ -88,7 +88,8 @@ describe('marketplace-converter', () => {
       expect(manifest.name).toBe('@testowner/test-plugin');
       expect(manifest.version).toBe('1.0.0');
       expect(manifest.description).toBe('Test plugin description');
-      expect(manifest.type).toBe('claude');
+      expect(manifest.format).toBe('claude');
+      expect(manifest.subtype).toBe('rule');
       expect(manifest.author).toBe('Test Author');
       expect(manifest.files).toContain('plugin.md');
     });
@@ -119,7 +120,8 @@ describe('marketplace-converter', () => {
 
       const manifest = marketplaceToManifest(marketplace);
 
-      expect(manifest.type).toBe('claude');
+      expect(manifest.format).toBe('claude');
+      expect(manifest.subtype).toBe('agent');
       expect(manifest.files).toContain('.claude/agents/test-agent.md');
       expect(manifest.main).toBe('.claude/agents/test-agent.md');
     });
@@ -150,7 +152,8 @@ describe('marketplace-converter', () => {
 
       const manifest = marketplaceToManifest(marketplace);
 
-      expect(manifest.type).toBe('claude');
+      expect(manifest.format).toBe('claude');
+      expect(manifest.subtype).toBe('skill');
       expect(manifest.files).toContain('.claude/skills/test-skill.md');
       expect(manifest.main).toBe('.claude/skills/test-skill.md');
     });
@@ -181,7 +184,8 @@ describe('marketplace-converter', () => {
 
       const manifest = marketplaceToManifest(marketplace);
 
-      expect(manifest.type).toBe('claude');
+      expect(manifest.format).toBe('claude');
+      expect(manifest.subtype).toBe('slash-command');
       expect(manifest.files).toContain('.claude/commands/test.md');
       expect(manifest.main).toBe('.claude/commands/test.md');
     });

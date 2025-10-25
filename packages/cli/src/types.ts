@@ -2,11 +2,13 @@
  * Core types for the Prompt Package Manager
  */
 
-export type PackageType = 'cursor' | 'cursor-agent' | 'cursor-slash-command' | 'claude' | 'claude-skill' | 'claude-agent' | 'claude-slash-command' | 'continue' | 'windsurf' | 'generic' | 'mcp';
+export type Format = 'cursor' | 'claude' | 'continue' | 'windsurf' | 'copilot' | 'kiro' | 'generic' | 'mcp';
+export type Subtype = 'rule' | 'agent' | 'skill' | 'slash-command' | 'prompt' | 'workflow' | 'tool' | 'template' | 'collection';
 
 export interface Package {
   id: string;
-  type: PackageType;
+  format: Format;
+  subtype: Subtype;
   url: string;
   dest: string;
   // Future expansion fields (not used in MVP)
@@ -21,7 +23,8 @@ export interface Package {
 
 export interface AddOptions {
   url: string;
-  type: PackageType;
+  format: Format;
+  subtype?: Subtype;
 }
 
 export interface RemoveOptions {
@@ -30,7 +33,8 @@ export interface RemoveOptions {
 
 export interface ListOptions {
   // Future expansion: filtering, sorting
-  type?: PackageType;
+  format?: Format;
+  subtype?: Subtype;
 }
 
 export interface IndexOptions {

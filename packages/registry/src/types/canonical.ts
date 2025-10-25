@@ -13,7 +13,11 @@ export interface CanonicalPackage {
   description: string;
   author: string;
   tags: string[];
-  type: 'rule' | 'agent' | 'skill' | 'prompt';
+
+  // New taxonomy: format + subtype
+  format: 'cursor' | 'claude' | 'continue' | 'windsurf' | 'copilot' | 'kiro' | 'agents.md' | 'generic' | 'mcp';
+  subtype: 'rule' | 'agent' | 'skill' | 'slash-command' | 'prompt' | 'workflow' | 'tool' | 'template' | 'collection';
+
 
   // Content in canonical format
   content: CanonicalContent;
@@ -30,6 +34,21 @@ export interface CanonicalPackage {
     claudeAgent?: {
       model?: 'sonnet' | 'opus' | 'haiku' | 'inherit';
     };
+    copilotConfig?: {
+      instructionName?: string; // Name for the instruction file
+      applyTo?: string; // REQUIRED for path-specific - glob pattern
+    };
+    kiroConfig?: {
+      filename?: string; // Suggested filename in .kiro/steering/
+      inclusion?: 'always' | 'fileMatch' | 'manual'; // REQUIRED - no default
+      fileMatchPattern?: string; // Required if inclusion is 'fileMatch'
+      domain?: string; // Domain/topic for organization
+      foundationalType?: 'product' | 'tech' | 'structure'; // Foundational file type (product.md, tech.md, structure.md)
+    };
+    agentsMdConfig?: {
+      project?: string; // Project name
+      scope?: string; // Scope of the instructions (e.g., "testing", "api")
+    };
   };
 
   // Format compatibility scores
@@ -38,10 +57,13 @@ export interface CanonicalPackage {
     claude?: number;
     continue?: number;
     windsurf?: number;
+    copilot?: number;
+    kiro?: number;
+    'agents.md'?: number;
   };
 
   // Source information
-  sourceFormat?: 'cursor' | 'claude' | 'continue' | 'windsurf' | 'generic';
+  sourceFormat?: 'cursor' | 'claude' | 'continue' | 'windsurf' | 'copilot' | 'kiro' | 'agents.md' | 'generic';
   sourceUrl?: string;
 
   // Quality & verification flags
@@ -170,7 +192,7 @@ export interface ContextSection {
  */
 export interface CustomSection {
   type: 'custom';
-  editorType?: 'cursor' | 'claude' | 'continue' | 'windsurf';
+  editorType?: 'cursor' | 'claude' | 'continue' | 'windsurf' | 'copilot' | 'kiro';
   title?: string;
   content: string;
   metadata?: Record<string, any>;
@@ -180,10 +202,25 @@ export interface CustomSection {
  * Format conversion options
  */
 export interface ConversionOptions {
-  targetFormat: 'cursor' | 'claude' | 'continue' | 'windsurf' | 'canonical';
+  targetFormat: 'cursor' | 'claude' | 'continue' | 'windsurf' | 'copilot' | 'kiro' | 'canonical';
   preserveComments?: boolean;
   optimizeForEditor?: boolean; // Use editor-specific features
   includeMetadata?: boolean;
+
+  // GitHub Copilot specific options
+  copilotConfig?: {
+    instructionName?: string;
+    applyTo?: string; // REQUIRED for path-specific
+  };
+
+  // Kiro specific options
+  kiroConfig?: {
+    filename?: string;
+    inclusion?: 'always' | 'fileMatch' | 'manual'; // REQUIRED
+    fileMatchPattern?: string; // Required if inclusion === 'fileMatch'
+    domain?: string;
+    foundationalType?: 'product' | 'tech' | 'structure'; // Foundational file type (product.md, tech.md, structure.md)
+  };
 }
 
 /**

@@ -10,7 +10,8 @@ import {
   SearchCollectionsParams,
   Package,
   Collection,
-  PackageType,
+  Format,
+  Subtype,
   SortType,
 } from '@/lib/api'
 import PackageModal from '@/components/PackageModal'
@@ -26,7 +27,8 @@ function SearchPageContent() {
   const initialParams = useState(() => ({
     tab: searchParams.get('tab') as TabType || 'packages',
     query: searchParams.get('q') || '',
-    type: searchParams.get('type') as PackageType || '',
+    format: searchParams.get('format') as Format || '',
+    subtype: searchParams.get('subtype') as Subtype || '',
     category: searchParams.get('category') || '',
     tags: searchParams.get('tags')?.split(',').filter(Boolean) || [],
     sort: searchParams.get('sort') as SortType || 'downloads',
@@ -36,7 +38,8 @@ function SearchPageContent() {
   // Initialize state from URL params
   const [activeTab, setActiveTab] = useState<TabType>(initialParams.tab)
   const [query, setQuery] = useState(initialParams.query)
-  const [selectedType, setSelectedType] = useState<PackageType | ''>(initialParams.type)
+  const [selectedFormat, setSelectedFormat] = useState<Format | ''>(initialParams.format)
+  const [selectedSubtype, setSelectedSubtype] = useState<Subtype | ''>(initialParams.subtype)
   const [selectedCategory, setSelectedCategory] = useState(initialParams.category)
   const [selectedTags, setSelectedTags] = useState<string[]>(initialParams.tags)
   const [sort, setSort] = useState<SortType>(initialParams.sort)
@@ -66,7 +69,8 @@ function SearchPageContent() {
 
     if (query) params.set('q', query)
     if (activeTab !== 'packages') params.set('tab', activeTab)
-    if (selectedType) params.set('type', selectedType)
+    if (selectedFormat) params.set('format', selectedFormat)
+    if (selectedSubtype) params.set('subtype', selectedSubtype)
     if (selectedCategory) params.set('category', selectedCategory)
     if (selectedTags.length > 0) params.set('tags', selectedTags.join(','))
     if (sort !== 'downloads') params.set('sort', sort)
@@ -74,7 +78,7 @@ function SearchPageContent() {
 
     const newUrl = params.toString() ? `/search?${params.toString()}` : '/search'
     router.replace(newUrl, { scroll: false })
-  }, [activeTab, query, selectedType, selectedCategory, selectedTags, sort, page, router, isInitialized])
+  }, [activeTab, query, selectedFormat, selectedSubtype, selectedCategory, selectedTags, sort, page, router, isInitialized])
 
   // Fetch packages
   const fetchPackages = async () => {
@@ -87,7 +91,8 @@ function SearchPageContent() {
       }
 
       if (query.trim()) params.q = query
-      if (selectedType) params.type = selectedType
+      if (selectedFormat) params.format = selectedFormat
+      if (selectedSubtype) params.subtype = selectedSubtype
       if (selectedCategory) params.category = selectedCategory
       if (selectedTags.length > 0) params.tags = selectedTags
 
@@ -131,7 +136,8 @@ function SearchPageContent() {
     setLoading(true)
     try {
       const params: SearchPackagesParams = {
-        type: 'claude-skill',
+        format: 'claude',
+        subtype: 'skill',
         limit,
         offset: (page - 1) * limit,
         sort,
@@ -151,12 +157,12 @@ function SearchPageContent() {
     }
   }
 
-  // Fetch slash commands (both Claude and Cursor slash commands)
+  // Fetch slash commands (all formats)
   const fetchSlashCommands = async () => {
     setLoading(true)
     try {
       const params: SearchPackagesParams = {
-        type: ['claude-slash-command', 'cursor-slash-command'],
+        subtype: 'slash-command',
         limit,
         offset: (page - 1) * limit,
         sort,
@@ -176,12 +182,12 @@ function SearchPageContent() {
     }
   }
 
-  // Fetch agents (both Claude and Cursor agents)
+  // Fetch agents (all formats)
   const fetchAgents = async () => {
     setLoading(true)
     try {
       const params: SearchPackagesParams = {
-        type: ['claude-agent', 'cursor-agent'],
+        subtype: 'agent',
         limit,
         offset: (page - 1) * limit,
         sort,
@@ -219,7 +225,7 @@ function SearchPageContent() {
       fetchAgents()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, query, selectedType, selectedCategory, selectedTags, sort, page])
+  }, [activeTab, query, selectedFormat, selectedCategory, selectedTags, sort, page])
 
   // Reset page when filters change (but not on initial load from URL)
   useEffect(() => {
@@ -229,7 +235,7 @@ function SearchPageContent() {
     // Check if any filter actually changed from initial state
     const filtersChanged =
       query !== initialParams.query ||
-      selectedType !== initialParams.type ||
+      selectedFormat !== initialParams.format ||
       selectedCategory !== initialParams.category ||
       JSON.stringify(selectedTags) !== JSON.stringify(initialParams.tags) ||
       sort !== initialParams.sort ||
@@ -240,7 +246,7 @@ function SearchPageContent() {
       setPage(1)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, selectedType, selectedCategory, selectedTags, sort, activeTab, isInitialized])
+  }, [query, selectedFormat, selectedCategory, selectedTags, sort, activeTab, isInitialized])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -256,13 +262,13 @@ function SearchPageContent() {
   }
 
   const clearFilters = () => {
-    setSelectedType('')
+    setSelectedFormat('')
     setSelectedCategory('')
     setSelectedTags([])
     setQuery('')
   }
 
-  const hasFilters = selectedType || selectedCategory || selectedTags.length > 0 || query
+  const hasFilters = selectedFormat || selectedCategory || selectedTags.length > 0 || query
 
   return (
     <main className="min-h-screen bg-prpm-dark">
@@ -384,29 +390,51 @@ function SearchPageContent() {
                 )}
               </div>
 
-              {/* Type Filter (packages only) */}
+              {/* Format and Subtype Filters (packages only) */}
               {activeTab === 'packages' && (
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Type
-                  </label>
-                  <select
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value as PackageType | '')}
-                    className="w-full px-3 py-2 bg-prpm-dark border border-prpm-border rounded text-white focus:outline-none focus:border-prpm-accent"
-                  >
-                    <option value="">All Types</option>
-                    <option value="cursor">Cursor</option>
-                    <option value="claude">Claude</option>
-                    <option value="claude-skill">Claude Skill</option>
-                    <option value="claude-agent">Claude Agent</option>
-                    <option value="claude-slash-command">Claude Slash Command</option>
-                    <option value="continue">Continue</option>
-                    <option value="windsurf">Windsurf</option>
-                    <option value="mcp">MCP</option>
-                    <option value="generic">Generic</option>
-                  </select>
-                </div>
+                <>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Format
+                    </label>
+                    <select
+                      value={selectedFormat}
+                      onChange={(e) => setSelectedFormat(e.target.value as Format | '')}
+                      className="w-full px-3 py-2 bg-prpm-dark border border-prpm-border rounded text-white focus:outline-none focus:border-prpm-accent"
+                    >
+                      <option value="">All Formats</option>
+                      <option value="cursor">Cursor</option>
+                      <option value="claude">Claude</option>
+                      <option value="continue">Continue</option>
+                      <option value="windsurf">Windsurf</option>
+                      <option value="copilot">GitHub Copilot</option>
+                      <option value="kiro">Kiro</option>
+                      <option value="mcp">MCP</option>
+                      <option value="generic">Generic</option>
+                    </select>
+                  </div>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Subtype
+                    </label>
+                    <select
+                      value={selectedSubtype}
+                      onChange={(e) => setSelectedSubtype(e.target.value as Subtype | '')}
+                      className="w-full px-3 py-2 bg-prpm-dark border border-prpm-border rounded text-white focus:outline-none focus:border-prpm-accent"
+                    >
+                      <option value="">All Subtypes</option>
+                      <option value="rule">Rule</option>
+                      <option value="agent">Agent</option>
+                      <option value="skill">Skill</option>
+                      <option value="slash-command">Slash Command</option>
+                      <option value="prompt">Prompt</option>
+                      <option value="workflow">Workflow</option>
+                      <option value="tool">Tool</option>
+                      <option value="template">Template</option>
+                      <option value="collection">Collection</option>
+                    </select>
+                  </div>
+                </>
               )}
 
               {/* Sort */}
@@ -523,7 +551,7 @@ function SearchPageContent() {
                               <p className="text-gray-400 mb-3">{pkg.description || 'No description'}</p>
                               <div className="flex items-center gap-4 text-sm text-gray-500">
                                 <span className="px-2 py-1 bg-prpm-dark border border-prpm-border rounded text-gray-400">
-                                  {pkg.type}
+                                  {`${pkg.format}-${pkg.subtype}`}
                                 </span>
                                 {pkg.category && (
                                   <span>{pkg.category}</span>

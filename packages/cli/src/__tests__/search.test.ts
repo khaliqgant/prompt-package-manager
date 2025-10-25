@@ -121,13 +121,12 @@ describe('search command', () => {
 
       mockClient.search.mockResolvedValue(mockResults);
 
-      await handleSearch('react', { type: 'rule', interactive: false });
+      await handleSearch('react', { subtype: 'rule', interactive: false });
 
       expect(mockClient.search).toHaveBeenCalledWith(
         'react',
         expect.objectContaining({
-          type: 'cursor',
-          tags: ['cursor-rule']
+          subtype: 'rule'
         })
       );
     });

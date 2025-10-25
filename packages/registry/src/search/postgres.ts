@@ -11,7 +11,8 @@ export function postgresSearch(server: FastifyInstance): SearchProvider {
   return {
     async search(searchQuery: string, filters: SearchFilters): Promise<SearchResult> {
       const {
-        type,
+        format,
+        subtype,
         tags,
         category,
         author,
@@ -33,15 +34,27 @@ export function postgresSearch(server: FastifyInstance): SearchProvider {
         params.push(searchQuery);
       }
 
-      if (type) {
-        if (Array.isArray(type)) {
-          // Handle array of types with IN clause
-          conditions.push(`type = ANY($${paramIndex++})`);
-          params.push(type);
+      if (format) {
+        if (Array.isArray(format)) {
+          // Handle array of formats with IN clause
+          conditions.push(`format = ANY($${paramIndex++})`);
+          params.push(format);
         } else {
-          // Handle single type
-          conditions.push(`type = $${paramIndex++}`);
-          params.push(type);
+          // Handle single format
+          conditions.push(`format = $${paramIndex++}`);
+          params.push(format);
+        }
+      }
+
+      if (subtype) {
+        if (Array.isArray(subtype)) {
+          // Handle array of subtypes with IN clause
+          conditions.push(`subtype = ANY($${paramIndex++})`);
+          params.push(subtype);
+        } else {
+          // Handle single subtype
+          conditions.push(`subtype = $${paramIndex++}`);
+          params.push(subtype);
         }
       }
 

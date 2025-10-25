@@ -7,7 +7,7 @@ import { listPackages } from '../core/lockfile';
 import { telemetry } from '../core/telemetry';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { PackageType } from '../types';
+import { Format, Subtype } from '../types';
 
 /**
  * Get destination directory based on package type
@@ -81,7 +81,7 @@ async function findPackageLocation(id: string, type?: string): Promise<string | 
 /**
  * Display packages in a formatted table
  */
-async function displayPackages(packages: Array<{id: string; version: string; resolved: string; type?: string; format?: string}>): Promise<void> {
+async function displayPackages(packages: Array<{id: string; version: string; resolved: string; format?: string; subtype?: string}>): Promise<void> {
   if (packages.length === 0) {
     console.log('📦 No packages installed');
     return;
@@ -94,14 +94,14 @@ async function displayPackages(packages: Array<{id: string; version: string; res
   const packagesWithLocations = await Promise.all(
     packages.map(async pkg => ({
       ...pkg,
-      location: await findPackageLocation(pkg.id, pkg.type)
+      location: await findPackageLocation(pkg.id, `${pkg.format}-${pkg.subtype}`)
     }))
   );
 
   // Calculate column widths
   const idWidth = Math.max(8, ...packagesWithLocations.map(p => p.id.length));
   const versionWidth = Math.max(7, ...packagesWithLocations.map(p => p.version.length));
-  const typeWidth = Math.max(6, ...packagesWithLocations.map(p => (p.type || '').length));
+  const typeWidth = Math.max(6, ...packagesWithLocations.map(p => (`${p.format || ''}-${p.subtype || ''}`).length));
   const locationWidth = Math.max(8, ...packagesWithLocations.map(p => (p.location || 'N/A').length));
 
   // Header
@@ -120,7 +120,7 @@ async function displayPackages(packages: Array<{id: string; version: string; res
     const row = [
       pkg.id.padEnd(idWidth),
       pkg.version.padEnd(versionWidth),
-      (pkg.type || '').padEnd(typeWidth),
+      (`${pkg.format}-${pkg.subtype}` || '').padEnd(typeWidth),
       (pkg.location || 'N/A').padEnd(locationWidth)
     ].join(' | ');
 

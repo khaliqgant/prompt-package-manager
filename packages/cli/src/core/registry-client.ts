@@ -3,7 +3,7 @@
  * Handles all communication with the PRMP Registry
  */
 
-import { PackageType } from '../types';
+import { Format, Subtype } from '../types';
 import type {
   DependencyTree,
   SearchResponse,
@@ -14,7 +14,8 @@ import type {
 export interface RegistryPackage {
   id: string;
   description?: string;
-  type: PackageType;
+  format: Format;
+  subtype: Subtype;
   tags: string[];
   total_downloads: number;
   rating_average?: number;
@@ -95,13 +96,15 @@ export class RegistryClient {
    * Search for packages in the registry
    */
   async search(query: string, options?: {
-    type?: PackageType;
+    format?: Format;
+    subtype?: Subtype;
     tags?: string[];
     limit?: number;
     offset?: number;
   }): Promise<SearchResult> {
     const params = new URLSearchParams({ q: query });
-    if (options?.type) params.append('type', options.type);
+    if (options?.format) params.append('format', options.format);
+    if (options?.subtype) params.append('subtype', options.subtype);
     if (options?.tags) options.tags.forEach(tag => params.append('tags', tag));
     if (options?.limit) params.append('limit', options.limit.toString());
     if (options?.offset) params.append('offset', options.offset.toString());
@@ -186,9 +189,10 @@ export class RegistryClient {
   /**
    * Get trending packages
    */
-  async getTrending(type?: PackageType, limit: number = 20): Promise<RegistryPackage[]> {
+  async getTrending(format?: Format, subtype?: Subtype, limit: number = 20): Promise<RegistryPackage[]> {
     const params = new URLSearchParams({ limit: limit.toString() });
-    if (type) params.append('type', type);
+    if (format) params.append('format', format);
+    if (subtype) params.append('subtype', subtype);
 
     const response = await this.fetch(`/api/v1/search/trending?${params}`);
     const data = await response.json() as SearchResponse;
@@ -198,9 +202,10 @@ export class RegistryClient {
   /**
    * Get featured packages
    */
-  async getFeatured(type?: PackageType, limit: number = 20): Promise<RegistryPackage[]> {
+  async getFeatured(format?: Format, subtype?: Subtype, limit: number = 20): Promise<RegistryPackage[]> {
     const params = new URLSearchParams({ limit: limit.toString() });
-    if (type) params.append('type', type);
+    if (format) params.append('format', format);
+    if (subtype) params.append('subtype', subtype);
 
     const response = await this.fetch(`/api/v1/search/featured?${params}`);
     const data = await response.json() as SearchResponse;

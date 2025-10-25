@@ -6,6 +6,9 @@
 import type { FastifyInstance } from 'fastify';
 import { toCursor } from '../converters/to-cursor.js';
 import { toClaude } from '../converters/to-claude.js';
+import { toCopilot } from '../converters/to-copilot.js';
+import { toKiro } from '../converters/to-kiro.js';
+import { toWindsurf } from '../converters/to-windsurf.js';
 import type { CanonicalPackage } from '../types/canonical.js';
 
 export async function convertRoutes(server: FastifyInstance) {
@@ -29,7 +32,7 @@ export async function convertRoutes(server: FastifyInstance) {
           properties: {
             format: {
               type: 'string',
-              enum: ['cursor', 'claude', 'continue', 'windsurf', 'canonical'],
+              enum: ['cursor', 'claude', 'continue', 'windsurf', 'copilot', 'kiro', 'canonical'],
               default: 'canonical',
             },
             version: { type: 'string' },
@@ -97,7 +100,8 @@ export async function convertRoutes(server: FastifyInstance) {
         }
 
         // Return as file download
-        const filename = `${id}.md`;
+        const canonicalPkg: CanonicalPackage = pkg.canonical_format || pkg;
+        const filename = getFilenameForFormat(format, id, canonicalPkg);
 
         return reply
           .header('Content-Type', 'text/markdown; charset=utf-8')
@@ -139,7 +143,7 @@ export async function convertRoutes(server: FastifyInstance) {
           properties: {
             format: {
               type: 'string',
-              enum: ['cursor', 'claude', 'continue', 'windsurf', 'canonical'],
+              enum: ['cursor', 'claude', 'continue', 'windsurf', 'copilot', 'kiro', 'canonical'],
               default: 'canonical',
             },
             version: { type: 'string' },
@@ -210,7 +214,7 @@ export async function convertRoutes(server: FastifyInstance) {
         );
 
         // Add converted content
-        const filename = getFilenameForFormat(format, pkg.id);
+        const filename = getFilenameForFormat(format, pkg.id, pkg);
         pack.entry({ name: filename }, converted.content);
 
         // Finalize
@@ -259,7 +263,7 @@ export async function convertRoutes(server: FastifyInstance) {
             },
             to: {
               type: 'string',
-              enum: ['cursor', 'claude', 'continue', 'windsurf', 'canonical'],
+              enum: ['cursor', 'claude', 'continue', 'windsurf', 'copilot', 'kiro', 'canonical'],
             },
             metadata: {
               type: 'object',
@@ -322,9 +326,26 @@ async function convertPackage(
       };
 
     case 'windsurf':
-      // TODO: Implement Windsurf converter
-      // For now, use Cursor format (similar)
-      return toCursor(pkg);
+      return toWindsurf(pkg);
+
+    case 'copilot': {
+      // GitHub Copilot format
+      const copilotConfig = pkg.metadata?.copilotConfig;
+      return toCopilot(pkg, { copilotConfig });
+    }
+
+    case 'kiro': {
+      // Kiro format
+      const kiroConfig = pkg.metadata?.kiroConfig;
+      if (!kiroConfig?.inclusion) {
+        return {
+          content: '',
+          warnings: ['Kiro format requires inclusion mode in package metadata'],
+        };
+      }
+      // Type assertion: we've verified inclusion exists above
+      return toKiro(pkg, { kiroConfig: kiroConfig as { filename?: string; inclusion: 'always' | 'fileMatch' | 'manual'; fileMatchPattern?: string; domain?: string } });
+    }
 
     case 'canonical':
     default:
@@ -337,7 +358,7 @@ async function convertPackage(
 /**
  * Get appropriate filename for format
  */
-function getFilenameForFormat(format: string, packageId: string): string {
+function getFilenameForFormat(format: string, packageId: string, pkg?: CanonicalPackage): string {
   switch (format) {
     case 'cursor':
       return `.cursorrules`;
@@ -347,6 +368,18 @@ function getFilenameForFormat(format: string, packageId: string): string {
       return `.continuerc.json`;
     case 'windsurf':
       return `.windsurfrules`;
+    case 'copilot': {
+      // GitHub Copilot: path-specific instructions need NAME.instructions.md
+      const instructionName = pkg?.metadata?.copilotConfig?.instructionName || packageId;
+      return pkg?.metadata?.copilotConfig?.applyTo
+        ? `${instructionName}.instructions.md`
+        : 'copilot-instructions.md';
+    }
+    case 'kiro': {
+      // Kiro: files in .kiro/steering/ with descriptive names
+      const filename = pkg?.metadata?.kiroConfig?.filename || packageId;
+      return `${filename}.md`;
+    }
     default:
       return `${packageId}.json`;
   }

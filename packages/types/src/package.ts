@@ -2,18 +2,34 @@
  * Package types and enums
  */
 
-export type PackageType =
+/**
+ * Package format - the AI tool/platform the package is for
+ */
+export type Format =
   | 'cursor'
-  | 'cursor-agent'
-  | 'cursor-slash-command'
   | 'claude'
-  | 'claude-skill'
-  | 'claude-agent'
-  | 'claude-slash-command'
   | 'continue'
   | 'windsurf'
+  | 'copilot'
+  | 'kiro'
+  | 'agents.md'
   | 'generic'
   | 'mcp';
+
+/**
+ * Package subtype - the functional category of the package
+ */
+export type Subtype =
+  | 'rule'
+  | 'agent'
+  | 'skill'
+  | 'slash-command'
+  | 'prompt'
+  | 'workflow'
+  | 'tool'
+  | 'template'
+  | 'collection';
+
 
 export type PackageVisibility = 'public' | 'private' | 'unlisted';
 
@@ -26,7 +42,8 @@ export interface Package {
   description?: string;
   author_id?: string;
   org_id?: string;
-  type: PackageType;
+  format: Format;
+  subtype: Subtype; // Required, defaults to 'rule'
   license?: string;
   repository_url?: string;
   homepage_url?: string;
@@ -87,7 +104,8 @@ export interface PackageManifest {
   repository?: string;
   homepage?: string;
   documentation?: string;
-  type: PackageType;
+  format: Format;
+  subtype?: Subtype; // Optional, defaults to 'rule'
   tags?: string[];
   keywords?: string[];
   category?: string;

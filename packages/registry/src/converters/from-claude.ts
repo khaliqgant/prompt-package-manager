@@ -16,6 +16,7 @@ import type {
   Rule,
   Example,
 } from '../types/canonical.js';
+import { detectSubtypeFromFrontmatter, setTaxonomy } from './taxonomy-utils.js';
 
 /**
  * Parse Claude agent format into canonical format
@@ -75,14 +76,17 @@ export function fromClaude(
   const bodySections = parseMarkdownBody(body);
   sections.push(...bodySections);
 
-  return {
+  // Detect subtype from frontmatter
+  const subtype = detectSubtypeFromFrontmatter(frontmatter);
+
+  // Create package with new taxonomy
+  const pkg: Partial<CanonicalPackage> = {
     id: metadata.id,
     version: metadata.version || '1.0.0',
     name: frontmatter.name || metadata.id,
     description: frontmatter.description || '',
     author: metadata.author || 'unknown',
     tags: metadata.tags || [],
-    type: 'agent', // Claude packages are typically agents
     content: {
       format: 'canonical',
       version: '1.0',
@@ -90,6 +94,11 @@ export function fromClaude(
     },
     sourceFormat: 'claude',
   };
+
+  // Set taxonomy (format + subtype + legacy type)
+  setTaxonomy(pkg, 'claude', subtype);
+
+  return pkg as CanonicalPackage;
 }
 
 /**

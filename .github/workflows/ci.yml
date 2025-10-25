@@ -35,10 +35,6 @@ jobs:
         ports:
           - 6379:6379
 
-    defaults:
-      run:
-        working-directory: ./packages/registry
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,7 +50,6 @@ jobs:
         run: npm ci
 
       - name: Build types package (required dependency)
-        working-directory: ./
         run: npm run build --workspace=@pr-pm/types
 
       - name: Start MinIO
@@ -72,12 +67,15 @@ jobs:
           echo "✅ MinIO is ready"
 
       - name: Type check
+        working-directory: ./packages/registry
         run: npx tsc --noEmit
 
       - name: Build
+        working-directory: ./packages/registry
         run: npm run build
 
       - name: Run tests
+        working-directory: ./packages/registry
         run: npm test -- --run
         env:
           DATABASE_URL: postgresql://prpm:prpm@localhost:5432/prpm_registry
@@ -94,10 +92,6 @@ jobs:
     name: CLI Tests
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./packages/cli
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -113,20 +107,21 @@ jobs:
         run: npm ci
 
       - name: Build types package (required dependency)
-        working-directory: ./
         run: npm run build --workspace=@pr-pm/types
 
       - name: Build registry-client
-        working-directory: ./
         run: npm run build --workspace=@pr-pm/registry-client
 
       - name: Type check
+        working-directory: ./packages/cli
         run: npx tsc --noEmit
 
       - name: Run tests
+        working-directory: ./packages/cli
         run: npm test
 
       - name: Build
+        working-directory: ./packages/cli
         run: npm run build
 
   # Registry Client Tests
@@ -134,10 +129,6 @@ jobs:
     name: Registry Client Tests
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./packages/registry-client
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -153,16 +144,18 @@ jobs:
         run: npm ci
 
       - name: Build types package (required dependency)
-        working-directory: ./
         run: npm run build --workspace=@pr-pm/types
 
       - name: Run tests
+        working-directory: ./packages/registry-client
         run: npm test
 
       - name: Type check
+        working-directory: ./packages/registry-client
         run: npx tsc --noEmit
 
       - name: Build
+        working-directory: ./packages/registry-client
         run: npm run build
 
   # Security Checks
@@ -185,10 +178,6 @@ jobs:
     name: Types Package Build
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./packages/types
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -204,9 +193,11 @@ jobs:
         run: npm ci
 
       - name: Type check
+        working-directory: ./packages/types
         run: npx tsc --noEmit
 
       - name: Build
+        working-directory: ./packages/types
         run: npm run build
 
   # Webapp Tests

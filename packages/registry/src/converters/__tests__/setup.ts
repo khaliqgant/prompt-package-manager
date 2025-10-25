@@ -14,7 +14,8 @@ export const sampleCanonicalPackage: CanonicalPackage = {
   description: 'A test package for conversion',
   author: 'testauthor',
   tags: ['test', 'example'],
-  type: 'agent',
+  format: 'claude',
+  subtype: 'agent',
   content: {
     format: 'canonical',
     version: '1.0',
@@ -106,7 +107,8 @@ export const minimalCanonicalPackage: CanonicalPackage = {
   description: 'A minimal test package',
   author: 'testauthor',
   tags: [],
-  type: 'rule',
+  format: 'cursor',
+  subtype: 'rule',
   content: {
     format: 'canonical',
     version: '1.0',

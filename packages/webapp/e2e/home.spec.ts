@@ -31,7 +31,7 @@ test.describe('Home Page', () => {
     await page.goto('/');
 
     // Check all feature cards are visible
-    await expect(page.getByText('1,042+ Packages')).toBeVisible();
+    await expect(page.getByText('1,500+ Packages')).toBeVisible();
     await expect(page.getByText('CLI Tool')).toBeVisible();
     await expect(page.getByText('Search & Discover')).toBeVisible();
     await expect(page.getByText('16 Collections')).toBeVisible();
@@ -91,7 +91,7 @@ test.describe('Home Page', () => {
     await expect(page.getByRole('heading', { name: 'PRPM' })).toBeVisible();
 
     // Feature cards should stack vertically (still visible)
-    await expect(page.getByText('1,042+ Packages')).toBeVisible();
+    await expect(page.getByText('1,500+ Packages')).toBeVisible();
     await expect(page.getByText('CLI Tool')).toBeVisible();
   });
 });

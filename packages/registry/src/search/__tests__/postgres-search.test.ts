@@ -87,16 +87,16 @@ describe('Postgres Search', () => {
       expect(result.total).toBe(4);
     });
 
-    it.skipIf(!dbAvailable)('should filter by type with empty query', async () => {
+    it.skipIf(!dbAvailable)('should filter by format with empty query', async () => {
       const result = await search.search('', {
-        type: 'claude',
+        format: 'claude',
         limit: 20,
         offset: 0,
       });
 
       expect(result.packages).toHaveLength(2);
       expect(result.total).toBe(2);
-      expect(result.packages.every(p => p.type === 'claude')).toBe(true);
+      expect(result.packages.every(p => p.format === 'claude')).toBe(true);
     });
 
     it.skipIf(!dbAvailable)('should filter by tags with empty query', async () => {
@@ -121,9 +121,9 @@ describe('Postgres Search', () => {
       expect(result.packages.every(p => p.category === 'programming')).toBe(true);
     });
 
-    it.skipIf(!dbAvailable)('should combine type and tags filters with empty query', async () => {
+    it.skipIf(!dbAvailable)('should combine format and tags filters with empty query', async () => {
       const result = await search.search('', {
-        type: 'claude',
+        format: 'claude',
         tags: ['claude-skill'],
         limit: 20,
         offset: 0,
@@ -131,7 +131,7 @@ describe('Postgres Search', () => {
 
       expect(result.packages).toHaveLength(2);
       expect(result.packages.every(p =>
-        p.type === 'claude' && p.tags.includes('claude-skill')
+        p.format === 'claude' && p.tags.includes('claude-skill')
       )).toBe(true);
     });
   });
@@ -160,9 +160,9 @@ describe('Postgres Search', () => {
       )).toBe(true);
     });
 
-    it.skipIf(!dbAvailable)('should combine text query with type filter', async () => {
+    it.skipIf(!dbAvailable)('should combine text query with format filter', async () => {
       const result = await search.search('Python', {
-        type: 'claude',
+        format: 'claude',
         limit: 20,
         offset: 0,
       });

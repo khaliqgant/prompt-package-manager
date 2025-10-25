@@ -25,7 +25,8 @@ interface Package {
   id: string
   name: string
   description: string
-  type: string
+  format: string
+  subtype: string
   total_downloads: number
   weekly_downloads: number
   monthly_downloads: number
@@ -362,7 +363,7 @@ function AuthorsPageContent() {
                       {pkg.name}
                     </h3>
                     <span className="px-2 py-1 bg-prpm-dark border border-prpm-border rounded text-gray-400 text-xs">
-                      {pkg.type}
+                      {pkg.format}
                     </span>
                   </div>
 

@@ -36,7 +36,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ### Home (`/`)
 - Hero section with gradient PRPM branding
-- Feature showcase (1,042+ packages, 16 collections, etc.)
+- Feature showcase (1,500+ packages, 16 collections, etc.)
 - Quick start CLI commands
 - Supported AI tools (Cursor, Claude, Continue, Windsurf)
 - Links to GitHub, top authors, and claim invite

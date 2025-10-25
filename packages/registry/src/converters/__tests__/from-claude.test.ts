@@ -399,7 +399,8 @@ description: Test
     it('should set type to agent', () => {
       const result = fromClaude(sampleClaudeAgent, metadata);
 
-      expect(result.type).toBe('agent');
+      expect(result.format).toBe('claude');
+      expect(result.subtype).toBe('agent');
     });
   });
 });

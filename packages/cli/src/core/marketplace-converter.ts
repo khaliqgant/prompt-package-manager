@@ -75,14 +75,19 @@ export function marketplaceToManifest(
 
   const plugin = marketplace.plugins[pluginIndex];
 
-  // Determine package type based on what the plugin contains
-  let type: 'claude' | 'cursor' | 'continue' | 'windsurf' | 'generic' = 'claude';
+  // Determine package format and subtype based on what the plugin contains
+  let format: 'claude' | 'cursor' | 'continue' | 'windsurf' | 'generic' = 'claude';
+  let subtype: 'rule' | 'agent' | 'skill' | 'slash-command' = 'rule';
+
   if (plugin.agents && plugin.agents.length > 0) {
-    type = 'claude';
+    format = 'claude';
+    subtype = 'agent';
   } else if (plugin.skills && plugin.skills.length > 0) {
-    type = 'claude';
+    format = 'claude';
+    subtype = 'skill';
   } else if (plugin.commands && plugin.commands.length > 0) {
-    type = 'claude';
+    format = 'claude';
+    subtype = 'slash-command';
   }
 
   // Generate package name from plugin name
@@ -108,7 +113,8 @@ export function marketplaceToManifest(
     name: packageName,
     version: plugin.version || marketplace.version || '1.0.0',
     description: plugin.description || marketplace.description,
-    type,
+    format,
+    subtype,
     author: plugin.author || marketplace.owner,
     files,
     tags,

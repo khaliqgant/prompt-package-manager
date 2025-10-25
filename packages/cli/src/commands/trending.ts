@@ -6,9 +6,9 @@ import { Command } from 'commander';
 import { getRegistryClient } from '@pr-pm/registry-client';
 import { getConfig } from '../core/user-config';
 import { telemetry } from '../core/telemetry';
-import { PackageType } from '../types';
+import { Format, Subtype } from '../types';
 
-export async function handleTrending(options: { type?: PackageType; limit?: number }): Promise<void> {
+export async function handleTrending(options: { format?: Format; subtype?: Subtype; limit?: number }): Promise<void> {
   const startTime = Date.now();
   let success = false;
   let error: string | undefined;
@@ -18,7 +18,7 @@ export async function handleTrending(options: { type?: PackageType; limit?: numb
 
     const config = await getConfig();
     const client = getRegistryClient(config);
-    const packages = await client.getTrending(options.type, options.limit || 10);
+    const packages = await client.getTrending(options.format, options.subtype, options.limit || 10);
 
     if (packages.length === 0) {
       console.log('\n❌ No trending packages found');
@@ -55,7 +55,8 @@ export async function handleTrending(options: { type?: PackageType; limit?: numb
       error,
       duration: Date.now() - startTime,
       data: {
-        type: options.type,
+        format: options.format,
+        subtype: options.subtype,
         limit: options.limit || 10,
       },
     });
@@ -68,18 +69,28 @@ export function createTrendingCommand(): Command {
 
   command
     .description('Show trending packages')
-    .option('--type <type>', 'Filter by package type (cursor, claude, continue)')
+    .option('--format <format>', 'Filter by format (cursor, claude, continue, windsurf, copilot, kiro, generic)')
+    .option('--subtype <subtype>', 'Filter by subtype (rule, agent, skill, slash-command, prompt, workflow, tool, template, collection)')
     .option('--limit <number>', 'Number of packages to show', '10')
-    .action(async (options: { limit?: string; type?: string }) => {
-      const type = options.type as PackageType | undefined;
+    .action(async (options: { limit?: string; format?: string; subtype?: string }) => {
+      const format = options.format as Format | undefined;
+      const subtype = options.subtype as Subtype | undefined;
       const limit = options.limit ? parseInt(options.limit, 10) : 10;
 
-      if (options.type && !['cursor', 'claude', 'continue', 'windsurf', 'generic'].includes(type!)) {
-        console.error('❌ Type must be one of: cursor, claude, continue, windsurf, generic');
+      const validFormats = ['cursor', 'claude', 'continue', 'windsurf', 'copilot', 'kiro', 'generic', 'mcp'];
+      const validSubtypes = ['rule', 'agent', 'skill', 'slash-command', 'prompt', 'workflow', 'tool', 'template', 'collection'];
+
+      if (options.format && !validFormats.includes(format!)) {
+        console.error(`❌ Format must be one of: ${validFormats.join(', ')}`);
         process.exit(1);
       }
 
-      await handleTrending({ type, limit });
+      if (options.subtype && !validSubtypes.includes(subtype!)) {
+        console.error(`❌ Subtype must be one of: ${validSubtypes.join(', ')}`);
+        process.exit(1);
+      }
+
+      await handleTrending({ format, subtype, limit });
     });
 
   return command;

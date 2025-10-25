@@ -7,13 +7,13 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { listPackages, addPackage } from '../core/lockfile';
 import { generateId } from '../core/filesystem';
-import { PackageType } from '../types';
+import { Format, Subtype } from '../types';
 
 /**
  * Scan directory for files and return file information
  * Recursively scans subdirectories for Claude skills/agents
  */
-async function scanDirectory(dirPath: string, type: PackageType): Promise<Array<{ filePath: string; filename: string; id: string }>> {
+async function scanDirectory(dirPath: string, format: Format, subtype: Subtype): Promise<Array<{ filePath: string; filename: string; id: string }>> {
   try {
     const files = await fs.readdir(dirPath, { withFileTypes: true });
     const results: Array<{ filePath: string; filename: string; id: string }> = [];
@@ -31,8 +31,8 @@ async function scanDirectory(dirPath: string, type: PackageType): Promise<Array<
         });
       } else if (file.isDirectory()) {
         // For Claude/Cursor skills/agents, scan subdirectories for structured packages
-        const isClaudeType = type === 'claude-skill' || type === 'claude-agent' || type === 'claude';
-        const isCursorAgent = type === 'cursor-agent';
+        const isClaudeType = format === 'claude';
+        const isCursorAgent = format === 'cursor' && subtype === 'agent';
 
         if (isClaudeType || isCursorAgent) {
           try {
@@ -93,23 +93,23 @@ export async function handleIndex(options: { verbose?: boolean } = {}): Promise<
     let totalAdded = 0;
     const summary: Array<{ dir: string; found: number; added: number }> = [];
 
-    // Define directories to scan with their types
-    const dirsToScan: Array<{ path: string; type: PackageType; label: string }> = [
-      { path: '.cursor/rules', type: 'cursor', label: 'Cursor Rules' },
-      { path: '.cursor/agents', type: 'cursor-agent', label: 'Cursor Agents' },
-      { path: '.cursor/commands', type: 'cursor-slash-command', label: 'Cursor Slash Commands' },
-      { path: '.claude/agents', type: 'claude-agent', label: 'Claude Agents' },
-      { path: '.claude/skills', type: 'claude-skill', label: 'Claude Skills' },
-      { path: '.claude/commands', type: 'claude-slash-command', label: 'Claude Slash Commands' },
-      { path: '.continue/rules', type: 'continue', label: 'Continue Rules' },
-      { path: '.windsurf/rules', type: 'windsurf', label: 'Windsurf Rules' },
-      { path: '.prompts', type: 'generic', label: 'Generic Prompts' },
-      { path: '.mcp', type: 'mcp', label: 'MCP Servers' },
+    // Define directories to scan with their format and subtype
+    const dirsToScan: Array<{ path: string; format: Format; subtype: Subtype; label: string }> = [
+      { path: '.cursor/rules', format: 'cursor', subtype: 'rule', label: 'Cursor Rules' },
+      { path: '.cursor/agents', format: 'cursor', subtype: 'agent', label: 'Cursor Agents' },
+      { path: '.cursor/commands', format: 'cursor', subtype: 'slash-command', label: 'Cursor Slash Commands' },
+      { path: '.claude/agents', format: 'claude', subtype: 'agent', label: 'Claude Agents' },
+      { path: '.claude/skills', format: 'claude', subtype: 'skill', label: 'Claude Skills' },
+      { path: '.claude/commands', format: 'claude', subtype: 'slash-command', label: 'Claude Slash Commands' },
+      { path: '.continue/rules', format: 'continue', subtype: 'rule', label: 'Continue Rules' },
+      { path: '.windsurf/rules', format: 'windsurf', subtype: 'rule', label: 'Windsurf Rules' },
+      { path: '.prompts', format: 'generic', subtype: 'prompt', label: 'Generic Prompts' },
+      { path: '.mcp', format: 'mcp', subtype: 'tool', label: 'MCP Servers' },
     ];
 
     // Scan each directory
     for (const dir of dirsToScan) {
-      const files = await scanDirectory(dir.path, dir.type);
+      const files = await scanDirectory(dir.path, dir.format, dir.subtype);
 
       if (files.length === 0) {
         if (options.verbose) {
@@ -129,8 +129,8 @@ export async function handleIndex(options: { verbose?: boolean } = {}): Promise<
             id: file.id,
             version: '0.0.0', // Local files don't have versions
             tarballUrl: `file://${path.resolve(file.filePath)}`,
-            type: dir.type,
-            format: dir.type,
+            format: dir.format,
+            subtype: dir.subtype,
           });
           if (options.verbose) {
             console.log(`  ✅ Added: ${file.filename} (${file.id})`);

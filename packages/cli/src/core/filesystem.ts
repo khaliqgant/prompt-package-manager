@@ -4,35 +4,44 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { PackageType } from '../types';
+import { Format, Subtype } from '../types';
 
 /**
- * Get the destination directory for a package type
+ * Get the destination directory for a package based on format and subtype
  */
-export function getDestinationDir(type: PackageType): string {
-  switch (type) {
+export function getDestinationDir(format: Format, subtype: Subtype): string {
+  switch (format) {
     case 'cursor':
+      if (subtype === 'agent') return '.cursor/agents';
+      if (subtype === 'slash-command') return '.cursor/commands';
       return '.cursor/rules';
-    case 'cursor-agent':
-      return '.cursor/agents';
-    case 'cursor-slash-command':
-      return '.cursor/commands';
+
     case 'claude':
-      return '.claude/agents';
-    case 'claude-agent':
-      return '.claude/agents';
-    case 'claude-skill':
-      return '.claude/skills';
-    case 'claude-slash-command':
-      return '.claude/commands';
+      if (subtype === 'skill') return '.claude/skills';
+      if (subtype === 'slash-command') return '.claude/commands';
+      if (subtype === 'agent') return '.claude/agents';
+      return '.claude/agents'; // Default for claude
+
     case 'continue':
       return '.continue/rules';
+
     case 'windsurf':
       return '.windsurf/rules';
+
+    case 'copilot':
+      return '.github/instructions';
+
+    case 'kiro':
+      return '.kiro/steering';
+
     case 'generic':
       return '.prompts';
+
+    case 'mcp':
+      return '.mcp/tools';
+
     default:
-      throw new Error(`Unknown package type: ${type}`);
+      throw new Error(`Unknown format: ${format}`);
   }
 }
 
@@ -55,7 +64,7 @@ export async function saveFile(filePath: string, content: string): Promise<void>
     // Ensure parent directory exists
     const dir = path.dirname(filePath);
     await ensureDirectoryExists(dir);
-    
+
     // Write file
     await fs.writeFile(filePath, content, 'utf-8');
   } catch (error) {

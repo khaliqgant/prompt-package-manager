@@ -18,7 +18,7 @@ export default function Home() {
           <div className="text-center mb-20">
             <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-prpm-dark-card border border-prpm-border rounded-full text-sm text-gray-400">
               <span className="w-2 h-2 bg-prpm-accent rounded-full animate-pulse"></span>
-              Alpha · 1,042+ packages · 16 collections
+              Alpha · 1,500+ packages · 16 collections
             </div>
 
             <div className="flex justify-center mb-8">
@@ -36,7 +36,7 @@ export default function Home() {
             </p>
 
             <p className="text-base sm:text-lg lg:text-xl mb-12 text-gray-400 max-w-3xl mx-auto leading-relaxed px-4">
-              Discover and install cross-platform prompts, rules, skills, and agents that work with Cursor, Claude, Continue, Windsurf, and more — all from one file.
+              Discover and install cross-platform prompts, rules, skills, and agents that work with Cursor, Claude, Continue, Windsurf, GitHub Copilot, Kiro, and more — all from one file.
             </p>
 
             <div className="flex gap-4 justify-center flex-wrap mb-12">
@@ -104,7 +104,7 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white">1,042+ Packages</h3>
+              <h3 className="text-xl font-semibold mb-2 text-white">1,500+ Packages</h3>
               <p className="text-gray-400 leading-relaxed">
                 Production-ready prompts, agents, skills, and slash commands from verified contributors
               </p>
@@ -228,6 +228,12 @@ export default function Home() {
               </div>
               <div className="px-6 py-3 bg-prpm-dark-card border border-prpm-border rounded-lg">
                 <span className="text-gray-300 font-medium">Windsurf</span>
+              </div>
+              <div className="px-6 py-3 bg-prpm-dark-card border border-prpm-border rounded-lg">
+                <span className="text-gray-300 font-medium">GitHub Copilot</span>
+              </div>
+              <div className="px-6 py-3 bg-prpm-dark-card border border-prpm-border rounded-lg">
+                <span className="text-gray-300 font-medium">Kiro</span>
               </div>
               <div className="px-6 py-3 bg-prpm-dark-card border border-prpm-border rounded-lg">
                 <span className="text-gray-300 font-medium">Generic Prompts</span>

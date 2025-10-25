@@ -43,7 +43,8 @@ export function openSearchSearch(server: FastifyInstance): SearchProvider {
   return {
     async search(searchQuery: string, filters: SearchFilters): Promise<SearchResult> {
       const {
-        type,
+        format,
+        subtype,
         tags,
         category,
         verified,
@@ -69,8 +70,12 @@ export function openSearchSearch(server: FastifyInstance): SearchProvider {
 
       const filter: unknown[] = [{ term: { visibility: 'public' } }];
 
-      if (type) {
-        filter.push({ term: { type } });
+      if (format) {
+        filter.push({ term: { format } });
+      }
+
+      if (subtype) {
+        filter.push({ term: { subtype } });
       }
 
       if (category) {

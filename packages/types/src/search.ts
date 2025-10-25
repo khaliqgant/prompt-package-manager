@@ -2,7 +2,7 @@
  * Search and discovery types
  */
 
-import { PackageType } from './package';
+import { Format, Subtype } from './package';
 import { Package } from './package';
 import { Collection } from './collection';
 import { CollectionCategory } from './collection';
@@ -13,7 +13,8 @@ export type SortType = 'downloads' | 'created' | 'updated' | 'quality' | 'rating
  * Package search filters
  */
 export interface SearchFilters {
-  type?: PackageType | PackageType[];
+  format?: Format | Format[];
+  subtype?: Subtype | Subtype[];
   tags?: string[];
   category?: string;
   author?: string; // Filter by author username
@@ -29,7 +30,8 @@ export interface SearchFilters {
  */
 export interface SearchPackagesParams {
   q?: string;
-  type?: PackageType | PackageType[];
+  format?: Format | Format[];
+  subtype?: Subtype | Subtype[];
   tags?: string[];
   category?: string;
   author?: string;

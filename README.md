@@ -12,7 +12,7 @@ npm install -g prpm
 prpm install collection/nextjs-pro  # Entire Next.js setup in one command
 ```
 
-**1,300+ packages** | **Works everywhere** (Cursor, Claude, Continue, Windsurf) | **One command to install**
+**1,300+ packages** | **Works everywhere** (Cursor, Claude, Continue, Windsurf, GitHub Copilot, Kiro) | **One command to install**
 
 ---
 
@@ -53,6 +53,8 @@ prpm install react-best-practices --as cursor    # → .cursor/rules/
 prpm install react-best-practices --as claude    # → .claude/agents/
 prpm install react-best-practices --as continue  # → .continue/prompts/
 prpm install react-best-practices --as windsurf  # → .windsurf/rules/
+prpm install react-best-practices --as copilot   # → .github/instructions/
+prpm install react-best-practices --as kiro      # → .kiro/steering/
 
 # Or just let PRPM auto-detect
 prpm install react-best-practices  # Installs in the right place automatically
@@ -116,6 +118,10 @@ prpm install systematic-debugging
 ```
 
 **It's npm for AI prompts. But it works everywhere.**
+
+### Team Consistency
+
+If you're working on a big project and some coworkers use Copilot, others use Claude, and sometimes it's Cursor, the only way to unify rules so it's consistent across the codebase is to use PRPM. It's an easy way to make sure everyone has the same rules across the team.
 
 ---
 
@@ -394,6 +400,11 @@ Contact [@khaliqgant](https://github.com/khaliqgant) for publishing access.
 - 🏗️ [Architecture](docs/ARCHITECTURE.md) - System design
 - 🔌 [MCP Servers](docs/MCP_SERVERS_IN_COLLECTIONS.md) - MCP configuration
 - 📝 [Publishing](docs/PUBLISHING.md) - Publish your packages
+
+**Format-Specific Guides:**
+- ✈️ [GitHub Copilot](docs/GITHUB_COPILOT.md) - Instructions for GitHub Copilot
+- 🎯 [Kiro](docs/KIRO.md) - Steering files for Kiro AI
+- 🌊 [Windsurf](docs/WINDSURF.md) - Rules for Windsurf editor
 
 ### 🛠️ Developer Documentation
 

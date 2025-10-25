@@ -2,12 +2,13 @@
  * Strongly typed request/response interfaces
  */
 
-import { PackageType, PackageVisibility } from '../types.js';
+import { Format, Subtype, PackageVisibility } from '../types.js';
 
 // Query string types
 export interface ListPackagesQuery {
   search?: string;
-  type?: PackageType;
+  format?: Format;
+  subtype?: Subtype;
   category?: string;
   featured?: boolean;
   verified?: boolean;
@@ -18,7 +19,8 @@ export interface ListPackagesQuery {
 
 export interface SearchQuery {
   q?: string;
-  type?: PackageType;
+  format?: Format;
+  subtype?: Subtype;
   category?: string;
   tags?: string | string[];
   verified?: boolean;
@@ -29,7 +31,8 @@ export interface SearchQuery {
 }
 
 export interface TrendingQuery {
-  type?: PackageType;
+  format?: Format;
+  subtype?: Subtype;
   limit?: number;
   offset?: number;
 }

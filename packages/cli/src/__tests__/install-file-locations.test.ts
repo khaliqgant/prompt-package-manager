@@ -96,7 +96,8 @@ describe('install command - file locations', () => {
       const mockPackage = {
         id: 'test-skill',
         name: 'test-skill',
-        type: 'claude-skill',
+        format: 'claude',
+        subtype: 'skill',
         tags: [],
         total_downloads: 100,
         verified: true,
@@ -116,7 +117,7 @@ describe('install command - file locations', () => {
       expect(saveFile).toHaveBeenCalledWith(expectedPath, expect.any(String));
 
       // Verify directory exists
-      const destDir = getDestinationDir('claude-skill');
+      const destDir = getDestinationDir('claude', 'skill');
       expect(destDir).toBe('.claude/skills');
     });
 
@@ -124,7 +125,8 @@ describe('install command - file locations', () => {
       const mockPackage = {
         id: 'test-agent',
         name: 'test-agent',
-        type: 'claude-agent',
+        format: 'claude',
+        subtype: 'agent',
         tags: [],
         total_downloads: 100,
         verified: true,
@@ -142,7 +144,7 @@ describe('install command - file locations', () => {
       const expectedPath = '.claude/agents/test-agent.md';
       expect(saveFile).toHaveBeenCalledWith(expectedPath, expect.any(String));
 
-      const destDir = getDestinationDir('claude-agent');
+      const destDir = getDestinationDir('claude', 'agent');
       expect(destDir).toBe('.claude/agents');
     });
 
@@ -150,7 +152,8 @@ describe('install command - file locations', () => {
       const mockPackage = {
         id: 'test-command',
         name: 'test-command',
-        type: 'claude-slash-command',
+        format: 'claude',
+        subtype: 'slash-command',
         tags: [],
         total_downloads: 100,
         verified: true,
@@ -168,7 +171,7 @@ describe('install command - file locations', () => {
       const expectedPath = '.claude/commands/test-command.md';
       expect(saveFile).toHaveBeenCalledWith(expectedPath, expect.any(String));
 
-      const destDir = getDestinationDir('claude-slash-command');
+      const destDir = getDestinationDir('claude', 'slash-command');
       expect(destDir).toBe('.claude/commands');
     });
   });
@@ -178,7 +181,8 @@ describe('install command - file locations', () => {
       const mockPackage = {
         id: 'test-cursor-rule',
         name: 'test-cursor-rule',
-        type: 'cursor',
+        format: 'cursor',
+        subtype: 'rule',
         tags: [],
         total_downloads: 100,
         verified: true,
@@ -202,7 +206,8 @@ describe('install command - file locations', () => {
       const mockPackage = {
         id: 'test-skill',
         name: 'test-skill',
-        type: 'claude-skill',
+        format: 'claude',
+        subtype: 'skill',
         tags: [],
         total_downloads: 100,
         verified: true,
@@ -226,7 +231,8 @@ describe('install command - file locations', () => {
       const mockPackage = {
         id: 'test-cursor',
         name: 'test-cursor',
-        type: 'cursor',
+        format: 'cursor',
+        subtype: 'rule',
         tags: [],
         total_downloads: 100,
         verified: true,
@@ -244,7 +250,7 @@ describe('install command - file locations', () => {
       const expectedPath = '.cursor/rules/test-cursor.mdc';
       expect(saveFile).toHaveBeenCalledWith(expectedPath, expect.any(String));
 
-      const destDir = getDestinationDir('cursor');
+      const destDir = getDestinationDir('cursor', 'rule');
       expect(destDir).toBe('.cursor/rules');
     });
 
@@ -252,7 +258,8 @@ describe('install command - file locations', () => {
       const mockPackage = {
         id: 'test-continue',
         name: 'test-continue',
-        type: 'continue',
+        format: 'continue',
+        subtype: 'rule',
         tags: [],
         total_downloads: 100,
         verified: true,
@@ -270,7 +277,7 @@ describe('install command - file locations', () => {
       const expectedPath = '.continue/rules/test-continue.md';
       expect(saveFile).toHaveBeenCalledWith(expectedPath, expect.any(String));
 
-      const destDir = getDestinationDir('continue');
+      const destDir = getDestinationDir('continue', 'rule');
       expect(destDir).toBe('.continue/rules');
     });
 
@@ -278,7 +285,8 @@ describe('install command - file locations', () => {
       const mockPackage = {
         id: 'test-windsurf',
         name: 'test-windsurf',
-        type: 'windsurf',
+        format: 'windsurf',
+        subtype: 'rule',
         tags: [],
         total_downloads: 100,
         verified: true,
@@ -296,7 +304,7 @@ describe('install command - file locations', () => {
       const expectedPath = '.windsurf/rules/test-windsurf.md';
       expect(saveFile).toHaveBeenCalledWith(expectedPath, expect.any(String));
 
-      const destDir = getDestinationDir('windsurf');
+      const destDir = getDestinationDir('windsurf', 'rule');
       expect(destDir).toBe('.windsurf/rules');
     });
   });
@@ -306,7 +314,8 @@ describe('install command - file locations', () => {
       const mockPackage = {
         id: 'test-skill',
         name: 'test-skill',
-        type: 'claude-skill',
+        format: 'claude',
+        subtype: 'skill',
         tags: [],
         total_downloads: 100,
         verified: true,
@@ -321,13 +330,13 @@ describe('install command - file locations', () => {
 
       await handleInstall('test-skill', { as: 'cursor' });
 
-      // Type should be claude-skill from package, format should be cursor from --as
+      // Format and subtype should be from package, installed format should be cursor from --as
       expect(addToLockfile).toHaveBeenCalledWith(
         expect.any(Object),
         'test-skill',
         expect.objectContaining({
-          type: 'claude-skill',
-          format: 'cursor',
+          format: 'claude',
+          subtype: 'skill',
         })
       );
     });
