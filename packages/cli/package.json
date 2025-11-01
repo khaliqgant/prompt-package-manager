@@ -44,12 +44,14 @@
   "author": "khaliqgant",
   "license": "MIT",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.40.0",
     "@octokit/rest": "^22.0.0",
     "@pr-pm/registry-client": "^1.2.5",
     "@pr-pm/types": "^0.1.5",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "commander": "^11.1.0",
+    "openai": "^4.76.0",
     "posthog-node": "^5.10.0",
     "tar": "^6.2.1"
   },

@@ -599,6 +599,159 @@ export class RegistryClient {
 
     throw lastError || new Error('Request failed after retries');
   }
+
+  /**
+   * Get test cases for a package
+   */
+  async getTestCases(packageId: string): Promise<{ test_cases: any[] }> {
+    const response = await fetch(
+      `${this.baseUrl}/api/v1/packages/${packageId}/test-cases`,
+      {
+        headers: this.getHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch test cases: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Get package content
+   */
+  async getPackageContent(packageId: string, version: string): Promise<any> {
+    const response = await fetch(
+      `${this.baseUrl}/api/v1/packages/${packageId}/versions/${version}/content`,
+      {
+        headers: this.getHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch package content: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Upload test results
+   */
+  async uploadTestResults(data: {
+    package_id: string;
+    package_version: string;
+    test_framework: string;
+    models_tested: string[];
+    plugins_used?: string[];
+    test_environment?: string;
+    total_tests: number;
+    tests_passed: number;
+    tests_failed: number;
+    overall_score: number;
+    total_duration_ms?: number;
+    total_tokens_used?: number;
+    total_cost_usd?: number;
+    test_details?: any[];
+    verify?: boolean;
+  }): Promise<{ id: string; is_verified: boolean }> {
+    if (!this.token) {
+      throw new Error('Authentication required to upload test results');
+    }
+
+    const response = await fetch(
+      `${this.baseUrl}/api/v1/test-results`,
+      {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(`Failed to upload test results: ${error.error || response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Submit hosted test job (prpm+ only)
+   */
+  async submitTestJob(data: {
+    package_id: string;
+    models?: string[];
+    plugins?: string[];
+    upload_results?: boolean;
+    verify_results?: boolean;
+  }): Promise<{
+    job_id: string;
+    status: string;
+    position_in_queue?: number;
+    estimated_wait_seconds?: number;
+    usage: {
+      tests_used_this_month: number;
+      tests_remaining: number;
+      tier: string;
+    };
+  }> {
+    if (!this.token) {
+      throw new Error('Authentication required for hosted testing');
+    }
+
+    const response = await fetch(`${this.baseUrl}/api/v1/test-jobs/run`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || error.reason || response.statusText);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Get test job status
+   */
+  async getTestJob(jobId: string): Promise<any> {
+    if (!this.token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await fetch(`${this.baseUrl}/api/v1/test-jobs/${jobId}`, {
+      headers: this.getHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get test job: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Get current test usage
+   */
+  async getTestUsage(): Promise<any> {
+    if (!this.token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await fetch(`${this.baseUrl}/api/v1/users/me/test-usage`, {
+      headers: this.getHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get usage: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
 }
 
 /**

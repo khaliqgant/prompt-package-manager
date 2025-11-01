@@ -16,6 +16,9 @@ import { newsletterRoutes } from './newsletter.js';
 import { organizationRoutes } from './organizations.js';
 import { subscriptionRoutes } from './subscriptions.js';
 import { webhookRoutes } from './webhooks.js';
+import { testCaseRoutes } from './test-cases.js';
+import { testResultRoutes } from './test-results.js';
+import { testJobRoutes } from './test-jobs.js';
 
 export async function registerRoutes(server: FastifyInstance) {
   // API v1 routes
@@ -33,6 +36,9 @@ export async function registerRoutes(server: FastifyInstance) {
       await api.register(newsletterRoutes, { prefix: '/newsletter' });
       await api.register(organizationRoutes, { prefix: '/organizations' });
       await api.register(subscriptionRoutes, { prefix: '/subscriptions' });
+      await api.register(testCaseRoutes, { prefix: '/' });
+      await api.register(testResultRoutes, { prefix: '/' });
+      await api.register(testJobRoutes, { prefix: '/' });
     },
     { prefix: '/api/v1' }
   );
