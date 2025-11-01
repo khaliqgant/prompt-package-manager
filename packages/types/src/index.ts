@@ -10,3 +10,4 @@ export * from './user';
 export * from './search';
 export * from './api';
 export * from './config';
+export * from './playground';

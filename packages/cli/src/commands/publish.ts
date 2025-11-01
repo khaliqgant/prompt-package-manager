@@ -585,11 +585,24 @@ export async function handlePublish(options: PublishOptions): Promise<void> {
 
         const packageUrl = `${webappUrl}/packages/${encodeURIComponent(manifest.name)}`;
 
+        // Determine the install command format
+        let installCmd: string;
+        if (selectedOrgId) {
+          const selectedOrg = userInfo.organizations.find((org: any) => org.id === selectedOrgId);
+          installCmd = `prpm install @${selectedOrg?.name || 'org'}/${manifest.name}`;
+        } else {
+          // Personal package - use author
+          const authorName = typeof manifest.author === 'string'
+            ? manifest.author
+            : manifest.author.name;
+          installCmd = `prpm install @${authorName}/${manifest.name}`;
+        }
+
         console.log('');
         console.log('✅ Package published successfully!');
         console.log('');
         console.log(`   Package: ${manifest.name}@${result.version}`);
-        console.log(`   Install: prpm install ${manifest.name}`);
+        console.log(`   Install: ${installCmd}`);
         console.log('');
 
         publishedPackages.push({

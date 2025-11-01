@@ -9,13 +9,16 @@ import { searchRoutes } from './search.js';
 import { userRoutes } from './users.js';
 import { collectionRoutes } from './collections.js';
 import { inviteRoutes } from './invites.js';
-import analyticsRoutes from './analytics.js';
+import { analyticsRoutes } from './analytics.js';
 import authorAnalyticsRoutes from './author-analytics.js';
 import authorsRoutes from './authors.js';
 import { newsletterRoutes } from './newsletter.js';
 import { organizationRoutes } from './organizations.js';
 import { subscriptionRoutes } from './subscriptions.js';
 import { webhookRoutes } from './webhooks.js';
+import { playgroundRoutes } from './playground.js';
+import { playgroundCreditsRoutes } from './playground-credits.js';
+import { testCaseRoutes } from './test-cases.js';
 
 export async function registerRoutes(server: FastifyInstance) {
   // API v1 routes
@@ -34,6 +37,9 @@ export async function registerRoutes(server: FastifyInstance) {
       await api.register(organizationRoutes, { prefix: '/organizations' });
       await api.register(subscriptionRoutes, { prefix: '/subscriptions' });
       await api.register(webhookRoutes, { prefix: '/webhooks' });
+      await api.register(playgroundRoutes, { prefix: '/playground' });
+      await api.register(playgroundCreditsRoutes, { prefix: '/playground' });
+      await api.register(testCaseRoutes, { prefix: '/' });
     },
     { prefix: '/api/v1' }
   );

@@ -221,7 +221,7 @@ export default async function PackagePage({ params }: { params: { author: string
               </svg>
             )}
             {pkg.featured && (
-              <span className="px-3 py-1 bg-prpm-purple/20 text-prpm-purple text-sm rounded-full">
+              <span className="px-3 py-1 bg-prpm-green/20 text-prpm-green text-sm rounded-full">
                 Featured
               </span>
             )}

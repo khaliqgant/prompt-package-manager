@@ -144,19 +144,19 @@ export default function AgentsMdDeepDivePost() {
           <div className="bg-prpm-dark-card border border-prpm-border rounded-xl p-6 mb-6">
             <ul className="space-y-3 text-gray-300">
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">1.</span>
+                <span className="text-prpm-green mt-1">1.</span>
                 <span><strong>Optional Frontmatter:</strong> Respects simplicity - frontmatter is entirely optional</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">2.</span>
+                <span className="text-prpm-green mt-1">2.</span>
                 <span><strong>Auto-Description Extraction:</strong> Extracts from first paragraph if not provided</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">3.</span>
+                <span className="text-prpm-green mt-1">3.</span>
                 <span><strong>Section Type Inference:</strong> Infers semantic types from content structure</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">4.</span>
+                <span className="text-prpm-green mt-1">4.</span>
                 <span><strong>Auto-Tag Inference:</strong> Automatically detects technology tags from content</span>
               </li>
             </ul>
@@ -661,7 +661,7 @@ project-root/
             </p>
           </div>
 
-          <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-purple/20 border border-prpm-accent/30 rounded-2xl p-8 text-center">
+          <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-green/20 border border-prpm-accent/30 rounded-2xl p-8 text-center">
             <h3 className="text-2xl font-bold text-white mb-4">Explore More Formats</h3>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/blog/continue-deep-dive" className="px-6 py-3 bg-prpm-accent hover:bg-prpm-accent-light text-white rounded-lg font-semibold transition-all">

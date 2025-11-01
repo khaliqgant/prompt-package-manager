@@ -270,7 +270,7 @@ export async function registerTelemetryPlugin(server: FastifyInstance) {
 
     // Track the request
     await telemetry.trackAPIRequest({
-      endpoint: request.routerPath || request.url,
+      endpoint: request.routeOptions?.url || request.url,
       method: request.method,
       statusCode: reply.statusCode,
       duration,
@@ -287,7 +287,7 @@ export async function registerTelemetryPlugin(server: FastifyInstance) {
     await telemetry.trackError({
       error: error.message,
       stack: error.stack,
-      endpoint: request.routerPath || request.url,
+      endpoint: request.routeOptions?.url || request.url,
       userId: request.user?.user_id,
       context: {
         method: request.method,

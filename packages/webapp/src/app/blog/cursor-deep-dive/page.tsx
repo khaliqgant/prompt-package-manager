@@ -144,7 +144,7 @@ export default function CursorDeepDivePost() {
             Cursor's MDC format strikes a balance between structure (YAML frontmatter) and flexibility (Markdown body). PRPM's implementation fully supports Cursor's features including MDC frontmatter generation, glob pattern support, quality scoring for conversions, and comprehensive section mapping.
           </p>
 
-          <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-purple/20 border border-prpm-accent/30 rounded-2xl p-8 text-center">
+          <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-green/20 border border-prpm-accent/30 rounded-2xl p-8 text-center">
             <h3 className="text-2xl font-bold text-white mb-4">Ready to explore more formats?</h3>
             <p className="text-gray-300 mb-6">
               Check out our deep dives on other AI coding tool formats

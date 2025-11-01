@@ -207,7 +207,7 @@ export default function LoginPage() {
       {/* Background effects */}
       <div className="absolute inset-0 bg-grid-pattern bg-[size:50px_50px] opacity-20"></div>
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-prpm-accent/20 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-prpm-purple/20 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-prpm-green/20 rounded-full blur-3xl"></div>
 
       {/* Login form */}
       <div className="relative z-10 w-full max-w-md">

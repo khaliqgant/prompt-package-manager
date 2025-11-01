@@ -8,14 +8,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'prpm-purple': '#10b981',
-        'prpm-purple-dark': '#059669',
-        'prpm-accent': '#34d399',
-        'prpm-accent-light': '#6ee7b7',
+        'prpm-green': '#10b981',
+        'prpm-green-dark': '#059669',
+        'prpm-green-light': '#34d399',
+        'prpm-green-lighter': '#6ee7b7',
+        'prpm-yellow': '#fbbf24',
+        'prpm-yellow-dark': '#f59e0b',
+        'prpm-yellow-light': '#fcd34d',
+        'prpm-yellow-lighter': '#fde68a',
         'prpm-dark': '#0a0a0f',
         'prpm-dark-lighter': '#12121a',
         'prpm-dark-card': '#1a1a24',
         'prpm-border': '#27273a',
+        'prpm-accent': '#34d399',
+        'prpm-accent-light': '#6ee7b7',
       },
       fontFamily: {
         mono: ['JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', 'monospace'],
@@ -35,5 +41,7 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }

@@ -611,7 +611,7 @@ function SearchPageContent() {
                                   </svg>
                                 )}
                                 {pkg.featured && (
-                                  <span className="px-2 py-1 bg-prpm-purple/20 text-prpm-purple text-xs rounded-full">
+                                  <span className="px-2 py-1 bg-prpm-green/20 text-prpm-green text-xs rounded-full">
                                     Featured
                                   </span>
                                 )}

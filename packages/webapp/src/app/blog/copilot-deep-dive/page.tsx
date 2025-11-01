@@ -290,7 +290,7 @@ This is a TypeScript monorepo using pnpm workspaces.
             </ul>
           </div>
 
-          <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-purple/20 border border-prpm-accent/30 rounded-2xl p-8 text-center">
+          <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-green/20 border border-prpm-accent/30 rounded-2xl p-8 text-center">
             <h3 className="text-2xl font-bold text-white mb-4">Continue Exploring</h3>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/blog/agents-md-deep-dive" className="px-6 py-3 bg-prpm-accent hover:bg-prpm-accent-light text-white rounded-lg font-semibold transition-all">

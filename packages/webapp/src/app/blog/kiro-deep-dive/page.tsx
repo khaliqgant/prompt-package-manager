@@ -106,19 +106,19 @@ export default function KiroDeepDivePost() {
           <div className="bg-prpm-dark-card border border-prpm-border rounded-xl p-6 mb-6">
             <ul className="space-y-3 text-gray-300">
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">1.</span>
+                <span className="text-prpm-green mt-1">1.</span>
                 <span><strong>Foundational Files:</strong> Keep as 'rule' subtype with specialized tags (kiro-product, kiro-tech, kiro-structure)</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">2.</span>
+                <span className="text-prpm-green mt-1">2.</span>
                 <span><strong>Frontmatter Validation:</strong> Strict on inclusion field, permissive on others</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">3.</span>
+                <span className="text-prpm-green mt-1">3.</span>
                 <span><strong>Glob Pattern Storage:</strong> Store as string, document .gitignore syntax</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">4.</span>
+                <span className="text-prpm-green mt-1">4.</span>
                 <span><strong>Quality Scoring:</strong> Deduct for unsupported features when converting to Kiro</span>
               </li>
             </ul>
@@ -196,7 +196,7 @@ export default function KiroDeepDivePost() {
             </ul>
           </div>
 
-          <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-purple/20 border border-prpm-accent/30 rounded-2xl p-8 text-center">
+          <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-green/20 border border-prpm-accent/30 rounded-2xl p-8 text-center">
             <h3 className="text-2xl font-bold text-white mb-4">Explore All Format Deep Dives</h3>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/blog/cursor-deep-dive" className="px-6 py-3 bg-prpm-accent hover:bg-prpm-accent-light text-white rounded-lg font-semibold transition-all">

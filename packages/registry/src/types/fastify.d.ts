@@ -5,6 +5,7 @@
 import { FastifyRequest, FastifyInstance } from 'fastify';
 import { PostgresDb } from '@fastify/postgres';
 import { Redis } from 'ioredis';
+import { RegistryConfig } from '../types.js';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -15,6 +16,7 @@ declare module 'fastify' {
   interface FastifyInstance {
     pg: PostgresDb;
     redis: Redis;
+    config: RegistryConfig;
     authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
     optionalAuth: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }

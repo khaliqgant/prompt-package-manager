@@ -61,6 +61,16 @@ export function loadConfig(): RegistryConfig {
       anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
       evaluationEnabled: process.env.AI_EVALUATION_ENABLED !== 'false',
     },
+
+    stripe: {
+      secretKey: process.env.STRIPE_SECRET_KEY || '',
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+    },
+
+    frontend: {
+      url: process.env.FRONTEND_URL || 'https://prpm.dev',
+    },
   };
 }
 

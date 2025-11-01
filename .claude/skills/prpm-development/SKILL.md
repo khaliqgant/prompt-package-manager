@@ -367,6 +367,11 @@ export function toFormat(pkg: CanonicalPackage): ConversionResult {
 - **Functions**: camelCase (`getPackage`, `convertToFormat`)
 - **Constants**: UPPER_SNAKE_CASE (`DEFAULT_REGISTRY_URL`)
 - **Database**: snake_case (`package_id`, `created_at`)
+- **API Requests/Responses**: snake_case (`package_id`, `session_id`, `created_at`)
+  - **Important**: All API request and response fields use snake_case to match PostgreSQL database conventions
+  - Internal service methods may use camelCase, but must convert to snake_case at API boundaries
+  - TypeScript interfaces for API types should use snake_case fields
+  - Examples: `PlaygroundRunRequest.package_id`, `CreditBalance.reset_at`
 
 ## Documentation Standards
 

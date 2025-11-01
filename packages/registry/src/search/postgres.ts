@@ -143,9 +143,10 @@ export function postgresSearch(server: FastifyInstance): SearchProvider {
 
       const result = await query<Package & { relevance: number }>(
         server,
-        `SELECT p.*, u.username as author_username, ${rankColumn}
+        `SELECT p.*, u.username as author_username, o.name as org_name, ${rankColumn}
          FROM packages p
          LEFT JOIN users u ON p.author_id = u.id
+         LEFT JOIN organizations o ON p.org_id = o.id
          WHERE ${whereClause}
          ORDER BY ${orderBy}
          LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,

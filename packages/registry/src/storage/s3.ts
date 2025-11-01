@@ -253,3 +253,155 @@ export async function deletePackage(
     throw new Error('Failed to delete package from storage');
   }
 }
+
+/**
+ * Download tarball from S3 and extract prompt content
+ */
+export async function getTarballContent(
+  server: FastifyInstance,
+  packageId: string,
+  version: string,
+  packageName: string
+): Promise<string> {
+  const key = `packages/${packageName}/${version}/package.tar.gz`;
+
+  try {
+    server.log.info({ packageName, version, key }, 'Fetching tarball from S3');
+
+    const command = new GetObjectCommand({
+      Bucket: config.s3.bucket,
+      Key: key,
+    });
+
+    const response = await s3Client.send(command);
+
+    if (!response.Body) {
+      throw new Error('Empty response from S3');
+    }
+
+    // Convert stream to buffer
+    const chunks: Uint8Array[] = [];
+    for await (const chunk of response.Body as any) {
+      chunks.push(chunk);
+    }
+    const tarballBuffer = Buffer.concat(chunks);
+
+    server.log.info({ packageName, version, size: tarballBuffer.length }, 'Downloaded tarball from S3');
+
+    // Extract and return the content
+    return await extractPromptContent(tarballBuffer, packageName);
+  } catch (error: unknown) {
+    server.log.error({
+      error: String(error),
+      packageName,
+      version,
+      key
+    }, 'Failed to fetch tarball from S3');
+    throw new Error(`Failed to fetch package content from storage: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * Extract prompt content from tarball
+ * Uses tar-stream for better compatibility
+ */
+async function extractPromptContent(tarballBuffer: Buffer, packageName: string): Promise<string> {
+  const zlib = await import('zlib');
+  // @ts-expect-error - tar-stream doesn't have TypeScript declarations
+  const tarStream = await import('tar-stream');
+  const { Readable } = await import('stream');
+
+  return new Promise((resolve, reject) => {
+    // Decompress gzip first
+    zlib.gunzip(tarballBuffer, (err: Error | null, result: Buffer) => {
+      if (err) {
+        reject(new Error(`Failed to decompress tarball: ${err.message}`));
+        return;
+      }
+
+      // Check if this is a tar archive
+      const isTar = result.length > 257 && result.toString('utf-8', 257, 262) === 'ustar';
+
+      if (!isTar) {
+        // Not a tar archive, treat as single gzipped file
+        const content = result.toString('utf-8');
+        if (content.trim().length > 0) {
+          resolve(content);
+        } else {
+          reject(new Error(`Empty content in tarball for ${packageName}`));
+        }
+        return;
+      }
+
+      // Extract using tar-stream
+      const extract = tarStream.extract();
+      const contentFiles: Array<{ name: string; content: string }> = [];
+
+      // Files to exclude (metadata files)
+      const excludeFiles = ['prpm.json', 'package.json', 'LICENSE', 'LICENSE.txt', 'LICENSE.md'];
+
+      extract.on('entry', (header: any, stream: any, next: any) => {
+        const fileName = header.name;
+        const baseName = fileName.split('/').pop() || '';
+
+        // Skip directories and excluded files
+        if (header.type !== 'file' || excludeFiles.includes(baseName)) {
+          stream.on('end', next);
+          stream.resume();
+          return;
+        }
+
+        // Only process text files (.md, .txt, or files without extension)
+        const ext = baseName.split('.').pop()?.toLowerCase();
+        const isTextFile = !ext || ext === 'md' || ext === 'txt' || ext === 'markdown';
+
+        if (isTextFile) {
+          let content = '';
+          stream.on('data', (chunk: Buffer) => {
+            content += chunk.toString('utf-8');
+          });
+          stream.on('end', () => {
+            if (content.trim().length > 0) {
+              contentFiles.push({ name: fileName, content });
+            }
+            next();
+          });
+        } else {
+          stream.on('end', next);
+          stream.resume();
+        }
+      });
+
+      extract.on('finish', () => {
+        if (contentFiles.length === 0) {
+          reject(new Error(`No content files found in tarball for ${packageName}`));
+          return;
+        }
+
+        // Prioritize certain files if multiple exist
+        const priorityFile = contentFiles.find(f => {
+          const lower = f.name.toLowerCase();
+          return lower.includes('skill.md') ||
+                 lower.includes('cursor') ||
+                 lower.includes('claude') ||
+                 lower.endsWith('/skill.md') ||
+                 lower === 'skill.md';
+        });
+
+        if (priorityFile) {
+          resolve(priorityFile.content);
+        } else {
+          // Return the first file's content
+          resolve(contentFiles[0].content);
+        }
+      });
+
+      extract.on('error', (err: Error) => {
+        reject(new Error(`Failed to extract tarball: ${err.message}`));
+      });
+
+      // Pipe the decompressed buffer through tar-stream
+      Readable.from(result).pipe(extract);
+    });
+  });
+}

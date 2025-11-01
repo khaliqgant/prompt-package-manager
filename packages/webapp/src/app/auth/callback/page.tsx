@@ -28,7 +28,7 @@ function AuthCallbackContent() {
 
   return (
     <div className="text-center">
-      <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-prpm-purple mb-4"></div>
+      <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-prpm-green mb-4"></div>
       <p className="text-gray-600 dark:text-gray-300">Completing authentication...</p>
     </div>
   )

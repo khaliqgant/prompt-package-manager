@@ -238,14 +238,14 @@ export default function ClaudeDeepDivePost() {
             <h3 className="text-xl font-bold text-white mb-4 mt-6">🔬 Anthropic Blog Posts</h3>
             <ul className="space-y-3 text-gray-300">
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">→</span>
+                <span className="text-prpm-green mt-1">→</span>
                 <span>
                   <a href="https://www.anthropic.com/news/skills" target="_blank" rel="noopener noreferrer" className="text-prpm-accent hover:underline font-semibold">Skills Announcement</a>
                   {' '}- Anthropic's vision for agent skills
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">→</span>
+                <span className="text-prpm-green mt-1">→</span>
                 <span>
                   <a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills" target="_blank" rel="noopener noreferrer" className="text-prpm-accent hover:underline font-semibold">Equipping Agents for the Real World</a>
                   {' '}- Deep technical dive into agent skills architecture
@@ -259,7 +259,7 @@ export default function ClaudeDeepDivePost() {
             Claude's skills system represents a reference-based approach where skills are documentation, not instructions. CSO optimization is critical for discovery, and examples matter more than explanations. PRPM fully supports Claude's frontmatter parsing, skills vs agents detection, and CSO validation.
           </p>
 
-          <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-purple/20 border border-prpm-accent/30 rounded-2xl p-8 text-center">
+          <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-green/20 border border-prpm-accent/30 rounded-2xl p-8 text-center">
             <h3 className="text-2xl font-bold text-white mb-4">Explore More Format Deep Dives</h3>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

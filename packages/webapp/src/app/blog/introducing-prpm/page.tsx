@@ -106,23 +106,23 @@ export default function IntroducingPRPMPost() {
           <div className="bg-prpm-dark-card border border-prpm-border rounded-xl p-6 mb-6">
             <ul className="space-y-3 text-gray-300">
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">→</span>
+                <span className="text-prpm-green mt-1">→</span>
                 <span><strong className="text-white">Web Publishing:</strong> Publish packages directly from the webapp</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">→</span>
+                <span className="text-prpm-green mt-1">→</span>
                 <span><strong className="text-white">Enhanced Analytics:</strong> Detailed download stats, ratings, and community feedback</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">→</span>
+                <span className="text-prpm-green mt-1">→</span>
                 <span><strong className="text-white">prpm+:</strong> Advanced tooling for both using and writing prompts</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">→</span>
+                <span className="text-prpm-green mt-1">→</span>
                 <span><strong className="text-white">Team Features:</strong> Private registries and organization accounts</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-prpm-purple mt-1">→</span>
+                <span className="text-prpm-green mt-1">→</span>
                 <span><strong className="text-white">AI-Powered Discovery:</strong> Smart recommendations based on your workflow</span>
               </li>
             </ul>
@@ -153,7 +153,7 @@ export default function IntroducingPRPMPost() {
             </Link>
           </div>
 
-          <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-purple/20 border border-prpm-accent/30 rounded-2xl p-8 text-center">
+          <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-green/20 border border-prpm-accent/30 rounded-2xl p-8 text-center">
             <h3 className="text-2xl font-bold text-white mb-4">Ready to get started?</h3>
             <p className="text-gray-300 mb-6">
               Install the CLI and start exploring 1,500+ packages today

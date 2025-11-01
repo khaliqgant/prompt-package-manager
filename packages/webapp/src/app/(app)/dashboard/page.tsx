@@ -177,7 +177,7 @@ export default function DashboardPage() {
       <header className="border-b border-prpm-border bg-prpm-dark-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-prpm-accent to-prpm-purple bg-clip-text text-transparent">
+            <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-prpm-accent to-prpm-green bg-clip-text text-transparent">
               PRPM
             </Link>
           </div>
@@ -197,7 +197,7 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Unclaimed Packages Banner */}
         {unclaimedCount > 0 && (
-          <div className="mb-8 bg-gradient-to-r from-prpm-accent/20 to-prpm-purple/20 border border-prpm-accent/30 rounded-xl p-6">
+          <div className="mb-8 bg-gradient-to-r from-prpm-accent/20 to-prpm-green/20 border border-prpm-accent/30 rounded-xl p-6">
             <div className="flex items-start gap-4">
               <div className="text-4xl">🎉</div>
               <div className="flex-1">
@@ -344,7 +344,7 @@ export default function DashboardPage() {
 
           <div className="bg-prpm-dark-card border border-prpm-border rounded-xl p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Downloads</h3>
-            <div className="text-4xl font-bold text-prpm-purple mb-2">{user.total_downloads || 0}</div>
+            <div className="text-4xl font-bold text-prpm-green mb-2">{user.total_downloads || 0}</div>
             <p className="text-gray-400 text-sm">Total downloads</p>
           </div>
         </div>

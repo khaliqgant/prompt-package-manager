@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import Fastify, { FastifyInstance } from 'fastify';
-import analyticsRoutes from '../analytics';
+import { analyticsRoutes } from '../analytics';
 
 describe('Analytics Routes', () => {
   let server: FastifyInstance;

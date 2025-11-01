@@ -66,6 +66,9 @@ async function buildServer() {
     genReqId: (req) => (req.headers?.['x-request-id'] as string) || crypto.randomUUID(),
   });
 
+  // Attach config to server for access in routes
+  server.decorate('config', config);
+
   // Security headers
   await server.register(helmet, {
     contentSecurityPolicy: {
@@ -211,8 +214,8 @@ async function buildServer() {
       method: request.method,
       url: request.url,
       statusCode: reply.statusCode,
-      responseTime: reply.getResponseTime()
-    }, `⬅️  ${request.method} ${request.url} - ${reply.statusCode} (${Math.round(reply.getResponseTime())}ms)`);
+      responseTime: reply.elapsedTime
+    }, `⬅️  ${request.method} ${request.url} - ${reply.statusCode} (${Math.round(reply.elapsedTime)}ms)`);
   });
 
   // Enhanced health check with dependency status
@@ -355,3 +358,6 @@ process.on('SIGTERM', async () => {
     process.exit(1);
   }
 })();
+
+// Export server instance for use in jobs
+export { serverInstance as server, buildServer };

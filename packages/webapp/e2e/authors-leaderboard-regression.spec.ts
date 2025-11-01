@@ -118,7 +118,7 @@ test.describe('Authors Page - Leaderboard Design Regression', () => {
       // Check gradient styling
       const banner = page.locator('div.bg-gradient-to-r').filter({ hasText: 'Want to Join the Leaderboard?' });
       await expect(banner).toBeVisible();
-      await expect(banner).toHaveClass(/from-prpm-purple/);
+      await expect(banner).toHaveClass(/from-prpm-green/);
     });
   });
 
@@ -189,7 +189,7 @@ test.describe('Authors Page - Leaderboard Design Regression', () => {
       // Check package counts with styling
       const firstAuthorPackages = page.locator('a').filter({ hasText: '@topauthor1' }).locator('text=150');
       await expect(firstAuthorPackages).toBeVisible();
-      await expect(firstAuthorPackages).toHaveClass(/text-prpm-purple/);
+      await expect(firstAuthorPackages).toHaveClass(/text-prpm-green/);
 
       // Check formatted download counts
       await expect(page.getByText('10,000')).toBeVisible();
@@ -263,7 +263,7 @@ test.describe('Authors Page - Leaderboard Design Regression', () => {
 
       // Check link attributes
       await expect(firstAuthor).toHaveAttribute('href', '/authors?username=topauthor1');
-      await expect(firstAuthor).toHaveClass(/hover:bg-prpm-purple\/5/);
+      await expect(firstAuthor).toHaveClass(/hover:bg-prpm-green\/5/);
 
       // Test navigation
       await page.click('text=@topauthor1');

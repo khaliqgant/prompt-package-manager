@@ -38,7 +38,7 @@ export default function NewsletterSubscribe() {
   };
 
   return (
-    <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-purple/20 border border-prpm-accent/30 rounded-2xl p-8 md:p-12 text-center">
+    <div className="bg-gradient-to-r from-prpm-accent/20 to-prpm-green/20 border border-prpm-accent/30 rounded-2xl p-8 md:p-12 text-center">
       <h2 className="text-3xl font-bold text-white mb-4">Stay Updated</h2>
       <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
         Get notified about new features, blog posts, and updates from the PRPM team

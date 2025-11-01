@@ -442,7 +442,7 @@ $ prpm install @stripe/api-v4-migration
             </div>
           </div>
 
-          <div className="not-prose bg-gradient-to-r from-prpm-accent/20 to-prpm-purple/20 border border-prpm-accent/30 rounded-2xl p-8 my-12 text-center">
+          <div className="not-prose bg-gradient-to-r from-prpm-accent/20 to-prpm-green/20 border border-prpm-accent/30 rounded-2xl p-8 my-12 text-center">
             <p className="text-2xl font-bold text-white mb-4">Ready to build the future?</p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
