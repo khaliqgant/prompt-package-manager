@@ -5,12 +5,14 @@
  * - Analytics aggregation
  * - Playground credits reset
  * - Cost monitoring and analytics refresh
+ * - Batch embedding generation for AI search
  */
 
 import cron, { ScheduledTask } from 'node-cron';
 import type { FastifyInstance } from 'fastify';
 import { PlaygroundCreditsService } from './playground-credits.js';
 import { CostMonitoringService } from './cost-monitoring.js';
+import { EmbeddingGenerationService } from './embedding-generation.js';
 
 interface CronJob {
   name: string;
@@ -24,11 +26,21 @@ export class CronScheduler {
   private jobs: CronJob[] = [];
   private creditsService: PlaygroundCreditsService;
   private costMonitoring: CostMonitoringService;
+  private embeddingService?: EmbeddingGenerationService;
 
   constructor(server: FastifyInstance) {
     this.server = server;
     this.creditsService = new PlaygroundCreditsService(server);
     this.costMonitoring = new CostMonitoringService(server);
+
+    // Only initialize embedding service if OpenAI API key is configured
+    if (process.env.OPENAI_API_KEY) {
+      try {
+        this.embeddingService = new EmbeddingGenerationService(server);
+      } catch (error) {
+        this.server.log.warn({ error }, 'Failed to initialize EmbeddingGenerationService - embeddings cron will be disabled');
+      }
+    }
   }
 
   /**
@@ -222,6 +234,97 @@ export class CronScheduler {
         },
       },
     ];
+
+    // =====================================================
+    // BATCH EMBEDDING GENERATION
+    // Every 6 hours (catches packages without embeddings)
+    // Only added if OpenAI API key is configured
+    // =====================================================
+    if (this.embeddingService) {
+      this.jobs.push({
+        name: 'Batch Embedding Generation',
+        schedule: '0 */6 * * *', // Every 6 hours at :00
+        task: async () => {
+          try {
+            this.server.log.info('🔄 Starting batch embedding generation...');
+
+            // Find packages needing embeddings
+            const packagesResult = await this.server.pg.query(`
+              SELECT p.id, p.name
+              FROM packages p
+              WHERE p.visibility = 'public'
+                AND p.deprecated = false
+                AND needs_embedding_regeneration(p.id) = true
+              ORDER BY p.total_downloads DESC
+              LIMIT 50
+            `);
+
+            const packages = packagesResult.rows;
+
+            if (packages.length === 0) {
+              this.server.log.info('No packages need embedding generation');
+              return;
+            }
+
+            this.server.log.info(
+              { packageCount: packages.length },
+              'Found packages needing embeddings'
+            );
+
+            let successful = 0;
+            let failed = 0;
+            let skipped = 0;
+
+            // Process packages in batch with rate limiting
+            for (const pkg of packages) {
+              try {
+                const result = await this.embeddingService!.generatePackageEmbedding({
+                  package_id: pkg.id,
+                  force_regenerate: false
+                });
+
+                if (result.success) {
+                  if (result.skipped) {
+                    skipped++;
+                  } else {
+                    successful++;
+                    this.server.log.info(
+                      { packageId: pkg.id, packageName: pkg.name },
+                      'Generated embedding'
+                    );
+                  }
+                } else {
+                  failed++;
+                  this.server.log.warn(
+                    { packageId: pkg.id, packageName: pkg.name, error: result.error },
+                    'Failed to generate embedding'
+                  );
+                }
+
+                // Rate limiting: wait 200ms between API calls
+                await new Promise(resolve => setTimeout(resolve, 200));
+              } catch (error) {
+                failed++;
+                this.server.log.error(
+                  { packageId: pkg.id, packageName: pkg.name, error },
+                  'Exception generating embedding'
+                );
+              }
+            }
+
+            this.server.log.info(
+              { total: packages.length, successful, failed, skipped },
+              '✅ Batch embedding generation completed'
+            );
+          } catch (error) {
+            this.server.log.error(
+              { error },
+              '❌ Batch embedding generation failed'
+            );
+          }
+        },
+      });
+    }
   }
 
   /**

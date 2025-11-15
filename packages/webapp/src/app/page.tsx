@@ -183,17 +183,17 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="group bg-prpm-dark-card border border-prpm-border rounded-xl p-6 hover-lift hover:border-prpm-accent/50 transition-all">
+            <Link href="/categories" className="group bg-prpm-dark-card border border-prpm-border rounded-xl p-6 hover-lift hover:border-prpm-accent/50 transition-all">
               <div className="w-12 h-12 mb-4 rounded-lg bg-prpm-accent/10 flex items-center justify-center">
                 <svg className="w-6 h-6 text-prpm-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-white">Search & Discover</h3>
+              <h3 className="text-xl font-semibold mb-2 text-white">Browse by Category</h3>
               <p className="text-gray-400 leading-relaxed">
-                Full-text search with tags, categories, and advanced filters
+                Hierarchical categories organized by development areas and frameworks
               </p>
-            </div>
+            </Link>
 
             <div className="group bg-prpm-dark-card border border-prpm-border rounded-xl p-6 hover-lift hover:border-prpm-accent/50 transition-all">
               <div className="w-12 h-12 mb-4 rounded-lg bg-prpm-accent/10 flex items-center justify-center">
@@ -229,6 +229,98 @@ export default function Home() {
               <p className="text-gray-400 leading-relaxed">
                 Semantic versioning with dependency resolution and updates
               </p>
+            </div>
+          </div>
+
+          {/* AI-Powered Discovery Section */}
+          <div className="mb-20">
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-gradient-to-br from-prpm-accent/10 via-prpm-green/10 to-prpm-accent/10 border-2 border-prpm-accent/30 rounded-2xl p-8 sm:p-12 text-center relative overflow-hidden">
+                {/* Background decoration */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-prpm-accent/10 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-prpm-green/10 rounded-full blur-3xl"></div>
+
+                <div className="relative z-10">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-prpm-accent/10 border border-prpm-accent/30 rounded-full">
+                    <svg className="w-4 h-4 text-prpm-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span className="text-sm font-semibold text-prpm-accent-light">AI-Powered Discovery</span>
+                  </div>
+
+                  <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                    Find Exactly What You Need
+                  </h2>
+
+                  <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
+                    {process.env.NEXT_PUBLIC_ENABLE_AI_SEARCH === 'true'
+                      ? 'Semantic AI search understands what you\'re trying to build. Browse hierarchical categories or explore by use case.'
+                      : 'Browse hierarchical categories or explore by use case to find what you need.'}
+                  </p>
+
+                  <div className={`grid grid-cols-1 ${process.env.NEXT_PUBLIC_ENABLE_AI_SEARCH === 'true' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-4 mb-8`}>
+                    {process.env.NEXT_PUBLIC_ENABLE_AI_SEARCH === 'true' && (
+                      <Link
+                        href="/search"
+                        className="px-6 py-4 bg-white/5 hover:bg-white/10 border border-white/20 hover:border-prpm-accent/50 text-white font-semibold rounded-xl transition-all group"
+                      >
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <svg className="w-5 h-5 text-prpm-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                          <span>AI Search</span>
+                        </div>
+                        <p className="text-sm text-gray-400 group-hover:text-gray-300">Natural language search</p>
+                      </Link>
+                    )}
+                    <Link
+                      href="/categories"
+                      className="px-6 py-4 bg-white/5 hover:bg-white/10 border border-white/20 hover:border-prpm-accent/50 text-white font-semibold rounded-xl transition-all group"
+                    >
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <svg className="w-5 h-5 text-prpm-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z" />
+                        </svg>
+                        <span>Categories</span>
+                      </div>
+                      <p className="text-sm text-gray-400 group-hover:text-gray-300">Browse by dev area</p>
+                    </Link>
+                    <Link
+                      href="/use-cases"
+                      className="px-6 py-4 bg-white/5 hover:bg-white/10 border border-white/20 hover:border-prpm-accent/50 text-white font-semibold rounded-xl transition-all group"
+                    >
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <svg className="w-5 h-5 text-prpm-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        <span>Use Cases</span>
+                      </div>
+                      <p className="text-sm text-gray-400 group-hover:text-gray-300">Find by goal</p>
+                    </Link>
+                  </div>
+
+                  <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-prpm-accent" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span>AI understands intent</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-green-400 font-semibold">Free for all users</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-prpm-accent" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span>Just sign in to use</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

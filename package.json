@@ -36,6 +36,9 @@
     "test:watch": "npm run test:watch --workspaces --if-present",
     "test:ci": "npm run test:ci --workspaces",
     "build:binary": "npm run build:binary --workspace=prpm",
+    "embeddings": "npm run script:generate-embeddings --workspace=@pr-pm/registry",
+    "embeddings:dry-run": "npm run script:generate-embeddings --workspace=@pr-pm/registry -- --dry-run",
+    "embeddings:force": "npm run script:generate-embeddings --workspace=@pr-pm/registry -- --force",
     "clean": "rm -rf packages/*/dist packages/*/.next registry/dist node_modules packages/*/node_modules registry/node_modules",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "typecheck:watch": "concurrently --kill-others --names \"CLI,CLIENT,REGISTRY\" \"npm run typecheck -- --watch --workspace=prpm\" \"npm run typecheck -- --watch --workspace=@pr-pm/registry-client\" \"npm run typecheck -- --watch --workspace=@pr-pm/registry\""

@@ -16,6 +16,8 @@
     "generate-test-cases": "tsx scripts/generate-test-cases-batch.ts",
     "generate-combined": "tsx scripts/generate-combined-batch.ts",
     "generate-suggested-inputs": "tsx scripts/generate-suggested-inputs.ts",
+    "script:generate-taxonomy": "tsx scripts/generate-taxonomy.ts",
+    "script:generate-embeddings": "tsx scripts/generate-embeddings.ts",
     "test": "command -v vitest > /dev/null && vitest run || echo 'Vitest not installed - skipping tests. Run: npm install'",
     "test:watch": "vitest",
     "test:coverage": "vitest --coverage",

@@ -24,7 +24,14 @@ import type {
   PlaygroundMessage,
   PlaygroundSession,
   PlaygroundRunRequest,
-  PlaygroundRunResponse
+  PlaygroundRunResponse,
+  AISearchQuery,
+  AISearchResponse,
+  AISearchResult,
+  CategoryListResponse,
+  UseCaseListResponse,
+  CategoryWithChildren,
+  UseCaseWithPackages
 } from '@pr-pm/types'
 
 // Re-export types for convenience
@@ -50,7 +57,14 @@ export type {
   PlaygroundMessage,
   PlaygroundSession,
   PlaygroundRunRequest,
-  PlaygroundRunResponse
+  PlaygroundRunResponse,
+  AISearchQuery,
+  AISearchResponse,
+  AISearchResult,
+  CategoryListResponse,
+  UseCaseListResponse,
+  CategoryWithChildren,
+  UseCaseWithPackages
 }
 
 const REGISTRY_URL = process.env.NEXT_PUBLIC_REGISTRY_URL || 'http://localhost:3111'
@@ -335,20 +349,6 @@ export async function getTags() {
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Failed to fetch tags' }))
     throw new Error(error.error || error.message || 'Failed to fetch tags')
-  }
-
-  return response.json()
-}
-
-/**
- * Get all available categories
- */
-export async function getCategories() {
-  const response = await fetch(`${REGISTRY_URL}/api/v1/search/categories`)
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to fetch categories' }))
-    throw new Error(error.error || error.message || 'Failed to fetch categories')
   }
 
   return response.json()
@@ -1117,6 +1117,195 @@ export async function getStarredCollections(token: string, limit = 20, offset = 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Failed to fetch starred collections' }))
     throw new Error(error.error || error.message || 'Failed to fetch starred collections')
+  }
+
+  return response.json()
+}
+
+/**
+ * AI Search (PRPM+ Feature)
+ */
+
+/**
+ * Perform AI-powered semantic search
+ */
+export async function aiSearch(query: AISearchQuery, jwtToken: string): Promise<AISearchResponse> {
+  const response = await fetch(`${REGISTRY_URL}/api/v1/ai-search`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${jwtToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(query),
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'AI search failed' }))
+    throw new Error(error.error || error.message || 'AI search failed')
+  }
+
+  return response.json()
+}
+
+/**
+ * Check if user has access to AI search
+ */
+export async function checkAISearchAccess(jwtToken: string) {
+  const response = await fetch(`${REGISTRY_URL}/api/v1/ai-search/access`, {
+    headers: {
+      'Authorization': `Bearer ${jwtToken}`,
+    },
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to check AI search access' }))
+    throw new Error(error.error || error.message || 'Failed to check AI search access')
+  }
+
+  return response.json()
+}
+
+/**
+ * Get similar packages using AI
+ */
+export async function getSimilarPackages(packageId: string, jwtToken: string | null, limit: number = 5) {
+  const headers: Record<string, string> = {};
+  if (jwtToken) {
+    headers['Authorization'] = `Bearer ${jwtToken}`;
+  }
+
+  const response = await fetch(`${REGISTRY_URL}/api/v1/ai-search/similar/${packageId}?limit=${limit}`, {
+    headers,
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to get similar packages' }))
+    throw new Error(error.error || error.message || 'Failed to get similar packages')
+  }
+
+  return response.json()
+}
+
+/**
+ * Get query suggestions for autocomplete
+ */
+export async function getQuerySuggestions(partialQuery: string, limit: number = 5): Promise<string[]> {
+  if (partialQuery.length < 3) {
+    return []
+  }
+
+  try {
+    const response = await fetch(
+      `${REGISTRY_URL}/api/v1/ai-search/suggestions?q=${encodeURIComponent(partialQuery)}&limit=${limit}`
+    )
+
+    if (!response.ok) {
+      return []
+    }
+
+    const data = await response.json()
+    return data.suggestions || []
+  } catch (error) {
+    console.warn('Failed to fetch query suggestions:', error)
+    return []
+  }
+}
+
+/**
+ * Taxonomy & Categories
+ */
+
+/**
+ * Get all categories as hierarchical tree
+ */
+export async function getCategories(includeCounts: boolean = false): Promise<CategoryListResponse> {
+  const response = await fetch(`${REGISTRY_URL}/api/v1/taxonomy/categories?include_counts=${includeCounts}`)
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to fetch categories' }))
+    throw new Error(error.error || error.message || 'Failed to fetch categories')
+  }
+
+  return response.json()
+}
+
+/**
+ * Get specific category by slug
+ */
+export async function getCategory(slug: string, includeCounts: boolean = false) {
+  const response = await fetch(`${REGISTRY_URL}/api/v1/taxonomy/categories/${slug}?include_counts=${includeCounts}`)
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to fetch category' }))
+    throw new Error(error.error || error.message || 'Failed to fetch category')
+  }
+
+  return response.json()
+}
+
+/**
+ * Get packages for a category
+ */
+export async function getPackagesByCategory(
+  slug: string,
+  options: {
+    limit?: number
+    offset?: number
+    includeChildren?: boolean
+  } = {}
+) {
+  const queryParams = new URLSearchParams()
+  if (options.limit) queryParams.append('limit', String(options.limit))
+  if (options.offset) queryParams.append('offset', String(options.offset))
+  if (options.includeChildren !== undefined) queryParams.append('include_children', String(options.includeChildren))
+
+  const response = await fetch(
+    `${REGISTRY_URL}/api/v1/taxonomy/categories/${slug}/packages?${queryParams.toString()}`
+  )
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to fetch packages' }))
+    throw new Error(error.error || error.message || 'Failed to fetch packages')
+  }
+
+  return response.json()
+}
+
+/**
+ * Get all use cases
+ */
+export async function getUseCases(includeCounts: boolean = false): Promise<UseCaseListResponse> {
+  const response = await fetch(`${REGISTRY_URL}/api/v1/taxonomy/use-cases?include_counts=${includeCounts}`)
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to fetch use cases' }))
+    throw new Error(error.error || error.message || 'Failed to fetch use cases')
+  }
+
+  return response.json()
+}
+
+/**
+ * Get packages for a use case
+ */
+export async function getPackagesByUseCase(
+  slug: string,
+  options: {
+    limit?: number
+    offset?: number
+  } = {}
+) {
+  const queryParams = new URLSearchParams()
+  if (options.limit) queryParams.append('limit', String(options.limit))
+  if (options.offset) queryParams.append('offset', String(options.offset))
+
+  const response = await fetch(
+    `${REGISTRY_URL}/api/v1/taxonomy/use-cases/${slug}?${queryParams.toString()}`
+  )
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to fetch packages' }))
+    throw new Error(error.error || error.message || 'Failed to fetch packages')
   }
 
   return response.json()

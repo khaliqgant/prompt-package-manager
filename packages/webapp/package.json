@@ -32,6 +32,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@types/jsonwebtoken": "^9.0.10",
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.553.0",
     "next": "^14.2.0",
     "posthog-js": "^1.289.0",
     "react": "^18.3.0",

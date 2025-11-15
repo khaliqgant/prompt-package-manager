@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useState, useEffect, useMemo, Suspense, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import {
   searchPackages,
   searchCollections,
+  aiSearch,
+  getQuerySuggestions,
   SearchPackagesParams,
   SearchCollectionsParams,
   Package,
@@ -13,12 +15,16 @@ import {
   Format,
   Subtype,
   SortType,
+  AISearchResult,
   getStarredPackages,
   getStarredCollections,
   starPackage,
   starCollection,
 } from '@/lib/api'
 import { getPackageUrl } from '@/lib/package-url'
+import { AISearchToggle } from '@/components/AISearchToggle'
+import { AISearchResults } from '@/components/AISearchResults'
+import { useAuth } from '@/components/AuthProvider'
 
 type TabType = 'packages' | 'collections' | 'skills' | 'slash-commands' | 'agents'
 
@@ -38,6 +44,7 @@ const FORMAT_SUBTYPES: Record<Format, Subtype[]> = {
 function SearchPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { user, jwtToken } = useAuth()
 
   // Track initial URL params to prevent reset on mount
   const initialParams = useState(() => ({
@@ -56,6 +63,7 @@ function SearchPageContent() {
   // Initialize state from URL params
   const [activeTab, setActiveTab] = useState<TabType>(initialParams.tab)
   const [query, setQuery] = useState(initialParams.query)
+  const [debouncedQuery, setDebouncedQuery] = useState(initialParams.query)
   const [selectedFormat, setSelectedFormat] = useState<Format | ''>(initialParams.format)
   const [selectedSubtype, setSelectedSubtype] = useState<Subtype | ''>(initialParams.subtype)
   const [selectedCategory, setSelectedCategory] = useState(initialParams.category)
@@ -74,7 +82,136 @@ function SearchPageContent() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [starredIds, setStarredIds] = useState<Set<string>>(new Set())
 
+  // AI Search state - load from localStorage
+  const [aiSearchEnabled, setAiSearchEnabled] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('aiSearchEnabled') === 'true'
+    }
+    return false
+  })
+  const [aiResults, setAiResults] = useState<AISearchResult[]>([])
+  const [aiExecutionTime, setAiExecutionTime] = useState(0)
+
+  // Query suggestions state
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false)
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
+  const suggestionsTimeoutRef = useRef<NodeJS.Timeout>()
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const searchTimeoutRef = useRef<NodeJS.Timeout>()
+
   const limit = 20
+
+  // Save AI search toggle to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('aiSearchEnabled', String(aiSearchEnabled))
+    }
+  }, [aiSearchEnabled])
+
+  // Debounce search query
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedQuery(query)
+    }, 500) // 500ms debounce for search
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+    }
+  }, [query])
+
+  // Debounced function to fetch suggestions
+  const fetchSuggestions = useCallback(async (searchQuery: string) => {
+    if (searchQuery.length < 3) {
+      setSuggestions([])
+      setShowSuggestions(false)
+      return
+    }
+
+    setLoadingSuggestions(true)
+    try {
+      const results = await getQuerySuggestions(searchQuery, 5)
+      setSuggestions(results)
+      setShowSuggestions(results.length > 0)
+    } catch (error) {
+      console.error('Failed to fetch suggestions:', error)
+      setSuggestions([])
+    } finally {
+      setLoadingSuggestions(false)
+    }
+  }, [])
+
+  // Handle query input with debouncing
+  const handleQueryChange = (value: string) => {
+    setQuery(value)
+    setSelectedSuggestionIndex(-1)
+
+    // Clear existing timeout
+    if (suggestionsTimeoutRef.current) {
+      clearTimeout(suggestionsTimeoutRef.current)
+    }
+
+    // Debounce suggestions fetch
+    if (value.length >= 3) {
+      suggestionsTimeoutRef.current = setTimeout(() => {
+        fetchSuggestions(value)
+      }, 300) // 300ms debounce
+    } else {
+      setSuggestions([])
+      setShowSuggestions(false)
+    }
+  }
+
+  // Handle keyboard navigation in suggestions
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || suggestions.length === 0) return
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setSelectedSuggestionIndex(prev =>
+        prev < suggestions.length - 1 ? prev + 1 : prev
+      )
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setSelectedSuggestionIndex(prev => (prev > 0 ? prev - 1 : -1))
+    } else if (e.key === 'Enter' && selectedSuggestionIndex >= 0) {
+      e.preventDefault()
+      const selectedSuggestion = suggestions[selectedSuggestionIndex]
+      setQuery(selectedSuggestion)
+      setShowSuggestions(false)
+      setPage(1)
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false)
+      setSelectedSuggestionIndex(-1)
+    }
+  }
+
+  // Handle suggestion click
+  const handleSuggestionClick = (suggestion: string) => {
+    setQuery(suggestion)
+    setShowSuggestions(false)
+    setSelectedSuggestionIndex(-1)
+    setPage(1)
+  }
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchInputRef.current && !searchInputRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Get available subtypes for the selected format
   const availableSubtypes = useMemo<Subtype[]>(() =>
@@ -173,8 +310,8 @@ function SearchPageContent() {
         let filteredPackages = allPackages.filter(pkg => starredIds.has(pkg.id))
 
         // Apply other filters client-side
-        if (query.trim()) {
-          const searchLower = query.toLowerCase()
+        if (debouncedQuery.trim()) {
+          const searchLower = debouncedQuery.toLowerCase()
           filteredPackages = filteredPackages.filter(
             pkg =>
               pkg.name.toLowerCase().includes(searchLower) ||
@@ -223,7 +360,7 @@ function SearchPageContent() {
           sort,
         }
 
-        if (query.trim()) params.q = query
+        if (debouncedQuery.trim()) params.q = debouncedQuery
         if (selectedFormat) params.format = selectedFormat
         if (selectedSubtype) params.subtype = selectedSubtype
         if (selectedCategory) params.category = selectedCategory
@@ -389,11 +526,54 @@ function SearchPageContent() {
     }
   }
 
+  // AI Search (PRPM+ Feature)
+  const performAISearch = async () => {
+    if (!debouncedQuery.trim() || !jwtToken) {
+      return
+    }
+
+    setLoading(true)
+    try {
+      const result = await aiSearch({
+        query: debouncedQuery,
+        filters: {
+          format: selectedFormat || undefined,
+          subtype: selectedSubtype || undefined,
+          language: undefined,
+          framework: undefined,
+          min_quality: undefined
+        },
+        limit: 20
+      }, jwtToken)
+
+      setAiResults(result.results)
+      setAiExecutionTime(result.execution_time_ms)
+      setTotal(result.total_matches)
+    } catch (error: any) {
+      console.error('AI search failed:', error)
+      // If AI search fails, fall back to traditional search
+      setAiSearchEnabled(false)
+      fetchPackages()
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Load data based on active tab
   useEffect(() => {
     // Clear previous results when switching tabs to ensure fresh data loads
     setPackages([])
     setCollections([])
+    setAiResults([])
+
+    // Use AI search if enabled and on packages tab (always, not just when query exists)
+    if (aiSearchEnabled && activeTab === 'packages') {
+      // Only perform AI search if there's a query, otherwise show empty state
+      if (debouncedQuery.trim()) {
+        performAISearch()
+      }
+      return // Don't fall back to regular search
+    }
 
     if (activeTab === 'packages') {
       fetchPackages()
@@ -407,7 +587,7 @@ function SearchPageContent() {
       fetchAgents()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, query, selectedFormat, selectedSubtype, selectedCategory, selectedTags, selectedAuthor, sort, page, starredOnly])
+  }, [activeTab, debouncedQuery, selectedFormat, selectedSubtype, selectedCategory, selectedTags, selectedAuthor, sort, page, aiSearchEnabled, starredOnly])
 
   // Reset page when filters change (but not on initial load from URL)
   useEffect(() => {
@@ -537,11 +717,17 @@ function SearchPageContent() {
         <form onSubmit={handleSearch} className="mb-8">
           <div className="relative">
             <input
+              ref={searchInputRef}
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search packages, collections, or skills..."
+              onChange={(e) => handleQueryChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={() => {
+                if (suggestions.length > 0) setShowSuggestions(true)
+              }}
+              placeholder={aiSearchEnabled ? "Search with AI (natural language)..." : "Search packages, collections, or skills..."}
               className="w-full px-6 py-4 bg-prpm-dark-card border border-prpm-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-prpm-accent transition-colors pr-12"
+              autoComplete="off"
             />
             <button
               type="submit"
@@ -551,7 +737,55 @@ function SearchPageContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </button>
+
+            {/* Suggestions Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-prpm-dark-card border border-prpm-border rounded-lg shadow-xl z-50 overflow-hidden">
+                {suggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className={`w-full text-left px-6 py-3 hover:bg-prpm-dark transition-colors border-b border-prpm-border last:border-b-0 ${
+                      index === selectedSuggestionIndex ? 'bg-prpm-dark' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <span className="text-white text-sm">{suggestion}</span>
+                    </div>
+                  </button>
+                ))}
+                <div className="px-6 py-2 bg-prpm-dark border-t border-prpm-border">
+                  <p className="text-xs text-gray-500 flex items-center gap-2">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Based on popular searches
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Loading indicator */}
+            {loadingSuggestions && query.length >= 3 && (
+              <div className="absolute right-14 top-1/2 -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-prpm-accent border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
           </div>
+
+          {/* AI Search Toggle */}
+          {activeTab === 'packages' && process.env.NEXT_PUBLIC_ENABLE_AI_SEARCH === 'true' && (
+            <div className="mt-4 flex justify-end">
+              <AISearchToggle
+                enabled={aiSearchEnabled}
+                onChange={setAiSearchEnabled}
+              />
+            </div>
+          )}
         </form>
 
         {/* Tabs */}
@@ -821,10 +1055,19 @@ function SearchPageContent() {
               </div>
             ) : (
               <>
-                {/* Package Results */}
-                {(activeTab === 'packages' || activeTab === 'skills' || activeTab === 'slash-commands' || activeTab === 'agents') && (
-                  <div className="space-y-4">
-                    {packages.length === 0 ? (
+                {/* AI Search Results */}
+                {aiSearchEnabled && activeTab === 'packages' && aiResults.length > 0 ? (
+                  <AISearchResults
+                    results={aiResults}
+                    query={query}
+                    executionTime={aiExecutionTime}
+                  />
+                ) : (
+                  <>
+                    {/* Package Results */}
+                    {(activeTab === 'packages' || activeTab === 'skills' || activeTab === 'slash-commands' || activeTab === 'agents') && (
+                      <div className="space-y-4">
+                        {packages.length === 0 ? (
                       <div className="text-center py-20">
                         <p className="text-gray-400 mb-4">No packages found</p>
                         {selectedFormat && (
@@ -996,6 +1239,8 @@ function SearchPageContent() {
                       </>
                     )}
                   </div>
+                )}
+                  </>
                 )}
 
                 {/* Collection Results */}

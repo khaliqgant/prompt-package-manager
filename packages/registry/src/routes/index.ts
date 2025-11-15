@@ -23,6 +23,8 @@ import { testCaseRoutes } from './test-cases.js';
 import { adminCostMonitoringRoutes } from './admin-cost-monitoring.js';
 import { suggestedTestInputsRoutes } from './suggested-test-inputs.js';
 import { playgroundAnalyticsRoutes } from './playground-analytics.js';
+import { taxonomyRoutes } from './taxonomy.js';
+import { aiSearchRoutes } from './ai-search.js';
 
 export async function registerRoutes(server: FastifyInstance) {
   // API v1 routes
@@ -48,6 +50,8 @@ export async function registerRoutes(server: FastifyInstance) {
       await api.register(adminCostMonitoringRoutes, { prefix: '/admin/cost-analytics' });
       await api.register(suggestedTestInputsRoutes, { prefix: '/suggested-inputs' });
       await api.register(playgroundAnalyticsRoutes, { prefix: '/analytics' });
+      await api.register(taxonomyRoutes, { prefix: '/taxonomy' });
+      await api.register(aiSearchRoutes, { prefix: '/ai-search' });
     },
     { prefix: '/api/v1' }
   );

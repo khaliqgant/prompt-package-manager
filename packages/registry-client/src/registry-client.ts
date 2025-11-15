@@ -40,6 +40,7 @@ export interface CollectionPackage {
   packageId: string;
   version?: string;
   required: boolean;
+  subtype?: string;
   reason?: string;
   package?: RegistryPackage;
 }

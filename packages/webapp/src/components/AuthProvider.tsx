@@ -1,6 +1,44 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+
+interface AuthState {
+  user: string | null
+  jwtToken: string | null
+}
+
+export function useAuth(): AuthState {
+  const [authState, setAuthState] = useState<AuthState>({
+    user: null,
+    jwtToken: null,
+  })
+
+  useEffect(() => {
+    const token = localStorage.getItem('prpm_token')
+    const username = localStorage.getItem('prpm_username')
+    setAuthState({
+      user: username,
+      jwtToken: token,
+    })
+
+    // Listen for storage changes (login/logout in other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'prpm_token' || e.key === 'prpm_username') {
+        const newToken = localStorage.getItem('prpm_token')
+        const newUsername = localStorage.getItem('prpm_username')
+        setAuthState({
+          user: newUsername,
+          jwtToken: newToken,
+        })
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [])
+
+  return authState
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {

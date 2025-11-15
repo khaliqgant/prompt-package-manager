@@ -18,6 +18,7 @@ import type {
   TrendingQuery,
   ResolveQuery,
 } from '../types/requests.js';
+import { EmbeddingGenerationService } from '../services/embedding-generation.js';
 
 // Reusable enum constants for schema validation
 const FORMAT_ENUM = ['cursor', 'claude', 'continue', 'windsurf', 'copilot', 'kiro', 'agents.md', 'generic', 'mcp'] as const;
@@ -1092,6 +1093,30 @@ export async function packageRoutes(server: FastifyInstance) {
       await cacheDeletePattern(server, `packages:list:*`);
 
       server.log.info({ packageName, version, userId }, 'Package published successfully');
+
+      // 7. Generate embedding asynchronously (non-blocking)
+      // Only attempt if OpenAI API key is configured
+      if (process.env.OPENAI_API_KEY) {
+        (async () => {
+          try {
+            const embeddingService = new EmbeddingGenerationService(server);
+            const result = await embeddingService.generatePackageEmbedding({
+              package_id: pkg.id,
+              force_regenerate: true // Always regenerate on publish
+            });
+
+            if (result.success && !result.skipped) {
+              server.log.info({ packageId: pkg.id, packageName }, 'Embedding generated on publish');
+            } else if (result.error) {
+              server.log.warn({ packageId: pkg.id, packageName, error: result.error }, 'Failed to generate embedding on publish (non-blocking)');
+            }
+          } catch (error) {
+            server.log.warn({ packageId: pkg.id, packageName, error: String(error) }, 'Exception generating embedding on publish (non-blocking)');
+          }
+        })();
+      } else {
+        server.log.debug({ packageId: pkg.id }, 'Skipping embedding generation - OPENAI_API_KEY not configured');
+      }
 
       return reply.send({
         success: true,

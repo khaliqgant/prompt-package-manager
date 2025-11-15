@@ -11,3 +11,5 @@ export * from './search';
 export * from './api';
 export * from './config';
 export * from './playground';
+export * from './taxonomy';
+export * from './embeddings';
