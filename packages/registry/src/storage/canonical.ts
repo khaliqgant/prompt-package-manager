@@ -59,6 +59,21 @@ export async function uploadCanonicalPackage(
   const buffer = Buffer.from(content, 'utf-8');
   const hash = createHash('sha256').update(buffer).digest('hex');
 
+  server.log.info(
+    {
+      packageName,
+      version,
+      key,
+      bucket: config.s3.bucket,
+      endpoint: config.s3.endpoint,
+      size: buffer.length,
+      hash: hash.substring(0, 8),
+      format: canonicalPackage.format,
+      hasMetadata: !!canonicalPackage.metadata,
+    },
+    '📤 Uploading canonical package to S3...'
+  );
+
   try {
     await s3Client.send(
       new PutObjectCommand({
@@ -88,22 +103,32 @@ export async function uploadCanonicalPackage(
         packageName,
         version,
         key,
+        url,
         size: buffer.length,
+        hash: hash.substring(0, 8),
       },
-      'Uploaded canonical package to S3'
+      '✅ Successfully uploaded canonical package to S3'
     );
 
     return { url, hash, size: buffer.length };
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+
     server.log.error(
       {
         error: errorMessage,
+        errorStack,
         packageName,
         version,
         key,
+        bucket: config.s3.bucket,
+        endpoint: config.s3.endpoint,
+        region: config.s3.region,
+        hasCredentials: !!(config.s3.accessKeyId && config.s3.secretAccessKey),
+        credentialsLength: config.s3.accessKeyId?.length,
       },
-      'Failed to upload canonical package to S3'
+      '❌ FAILED to upload canonical package to S3'
     );
     throw new Error(`Failed to upload canonical package: ${errorMessage}`);
   }

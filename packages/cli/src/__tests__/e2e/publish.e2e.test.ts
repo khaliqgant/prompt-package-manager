@@ -16,8 +16,8 @@ jest.mock('@pr-pm/registry-client');
 jest.mock('../../core/user-config');
 jest.mock('../../core/telemetry', () => ({
   telemetry: {
-    track: jest.fn(),
-    shutdown: jest.fn(),
+    track: jest.fn().mockResolvedValue(undefined),
+    shutdown: jest.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -27,6 +27,10 @@ describe('Publish Command - E2E Tests', () => {
 
   const mockClient = {
     publish: jest.fn(),
+    whoami: jest.fn().mockResolvedValue({
+      username: 'testuser',
+      organizations: [],
+    }),
   };
 
   beforeAll(() => {

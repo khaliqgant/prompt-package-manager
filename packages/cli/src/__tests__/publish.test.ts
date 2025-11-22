@@ -16,8 +16,8 @@ jest.mock('@pr-pm/registry-client');
 jest.mock('../core/user-config');
 jest.mock('../core/telemetry', () => ({
   telemetry: {
-    track: jest.fn(),
-    shutdown: jest.fn(),
+    track: jest.fn().mockResolvedValue(undefined),
+    shutdown: jest.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -460,6 +460,7 @@ describe('Publish Command', () => {
           version: '1.0.0',
           description: 'Test package for testing purposes',
           format: 'cursor',
+          subtype: 'rule',
           files: ['.cursorrules'],
         })
       );
@@ -467,8 +468,14 @@ describe('Publish Command', () => {
       await writeFile(join(testDir, '.cursorrules'), '---\ndescription: "Test"\n---\n\n# Test');
 
       const mockPublish = jest.fn();
+      const mockWhoami = jest.fn().mockResolvedValue({
+        username: 'testuser',
+        organizations: [],
+      });
+
       mockGetRegistryClient.mockReturnValue({
         publish: mockPublish,
+        whoami: mockWhoami,
       } as any);
 
       await handlePublish({ dryRun: true });

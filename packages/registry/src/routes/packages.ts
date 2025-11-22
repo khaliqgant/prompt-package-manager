@@ -1002,6 +1002,17 @@ export async function packageRoutes(server: FastifyInstance) {
           };
 
           // Convert to canonical based on format
+          server.log.info(
+            {
+              packageName,
+              version,
+              format,
+              contentLength: fullContent.length,
+              hasMetadata: !!metadata,
+            },
+            '🔄 Converting package to canonical format...'
+          );
+
           let canonicalPkg;
           try {
             switch (format) {
@@ -1036,36 +1047,62 @@ export async function packageRoutes(server: FastifyInstance) {
                 break;
               default:
                 // Generic/unknown format - try cursor as fallback
+                server.log.warn({ packageName, version, format }, 'Unknown format, using cursor converter as fallback');
                 canonicalPkg = fromCursor(fullContent, metadata);
             }
 
-            // Upload canonical to S3
-            await uploadCanonicalPackage(server, packageName, version, canonicalPkg);
-            server.log.info({ packageName, version }, 'Successfully uploaded canonical format');
-          } catch (conversionError) {
-            // Log but don't fail publish if canonical conversion fails
-            server.log.warn(
+            server.log.info(
               {
-                error: String(conversionError),
                 packageName,
                 version,
                 format,
+                canonicalFormat: canonicalPkg.format,
+                hasContent: !!canonicalPkg.content,
               },
-              'Failed to convert to canonical format (non-blocking)'
+              '✅ Conversion to canonical format succeeded'
+            );
+
+            // Upload canonical to S3
+            await uploadCanonicalPackage(server, packageName, version, canonicalPkg);
+
+          } catch (conversionError) {
+            // Log detailed error but don't fail publish
+            const errorMessage = conversionError instanceof Error ? conversionError.message : String(conversionError);
+            const errorStack = conversionError instanceof Error ? conversionError.stack : undefined;
+
+            server.log.error(
+              {
+                error: errorMessage,
+                errorStack,
+                packageName,
+                version,
+                format,
+                contentPreview: fullContent.substring(0, 200),
+                metadataKeys: Object.keys(metadata),
+              },
+              '❌ CANONICAL CONVERSION FAILED (non-blocking) - package published without canonical format'
             );
           }
         } else {
-          server.log.debug({ packageName, version }, 'No content extracted, skipping canonical conversion');
+          server.log.warn(
+            { packageName, version, format },
+            '⚠️  No content extracted from tarball, skipping canonical conversion'
+          );
         }
       } catch (error) {
         // Canonical storage is non-blocking - log but continue
-        server.log.warn(
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorStack = error instanceof Error ? error.stack : undefined;
+
+        server.log.error(
           {
-            error: String(error),
+            error: errorMessage,
+            errorStack,
             packageName,
             version,
+            format,
           },
-          'Failed to store canonical format (non-blocking)'
+          '❌ CANONICAL STORAGE OUTER FAILURE (non-blocking) - package published without canonical format'
         );
       }
 
