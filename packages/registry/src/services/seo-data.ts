@@ -57,21 +57,13 @@ export class SeoDataService {
         return;
       }
 
-      // Upload individual package file: seo-data/packages/{packageName}.json
-      const sanitizedName = packageName.replace(/[@\/]/g, '-');
-      await uploadJsonObject(this.server, `packages/${sanitizedName}.json`, packageData, {
-        bucket: this.bucket,
-        prefix: this.prefix,
-        cacheControl: this.cacheControl,
-      });
-
       // Incrementally update main packages.json
       await this.updateMainPackagesJson(packageData);
 
       // Generate SEO-optimized HTML page with client-side enrichment
       await this.generateAndUploadStaticPage(packageData);
 
-      this.server.log.info({ packageName, sanitizedName }, '✅ Incremental SSG update complete');
+      this.server.log.info({ packageName }, '✅ Incremental SSG update complete');
     } catch (error) {
       this.server.log.error(
         { packageName, error: error instanceof Error ? error.message : String(error) },
