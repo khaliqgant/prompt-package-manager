@@ -519,9 +519,14 @@ export async function handlePublish(options: PublishOptions): Promise<void> {
 
     // Batch configuration
     const BATCH_SIZE = parseInt(process.env.PRPM_BATCH_SIZE || '5');
-    const BATCH_DELAY_MS = parseInt(process.env.PRPM_BATCH_DELAY_MS || '2000');
+    // Use 0ms delay in tests or dry run mode
+    const BATCH_DELAY_MS = options.dryRun || process.env.NODE_ENV === 'test'
+      ? 0
+      : parseInt(process.env.PRPM_BATCH_DELAY_MS || '2000');
     const MAX_RETRIES = parseInt(process.env.PRPM_MAX_RETRIES || '3');
-    const RETRY_DELAY_MS = parseInt(process.env.PRPM_RETRY_DELAY_MS || '5000');
+    const RETRY_DELAY_MS = options.dryRun || process.env.NODE_ENV === 'test'
+      ? 0
+      : parseInt(process.env.PRPM_RETRY_DELAY_MS || '5000');
 
     // Helper to delay between batches
     const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -535,8 +540,8 @@ export async function handlePublish(options: PublishOptions): Promise<void> {
              error.includes('ETIMEDOUT');
     };
 
-    // Show batch info if publishing multiple packages
-    if (filteredManifests.length > 1) {
+    // Show batch info if publishing multiple packages (only if delays are enabled)
+    if (filteredManifests.length > 1 && BATCH_DELAY_MS > 0) {
       console.log(`📦 Publishing ${filteredManifests.length} packages in batches of ${BATCH_SIZE}`);
       console.log(`⏱️  ${BATCH_DELAY_MS}ms delay between batches, ${RETRY_DELAY_MS}ms retry delay`);
       console.log('');
@@ -548,8 +553,8 @@ export async function handlePublish(options: PublishOptions): Promise<void> {
       packageName = manifest.name;
       version = manifest.version;
 
-      // Add batch delay between packages (but not before first package)
-      if (i > 0 && i % BATCH_SIZE === 0) {
+      // Add batch delay between packages (but not before first package or in dry run/test mode)
+      if (i > 0 && i % BATCH_SIZE === 0 && BATCH_DELAY_MS > 0) {
         console.log(`⏸️  Batch delay (${BATCH_DELAY_MS}ms) before next ${Math.min(BATCH_SIZE, filteredManifests.length - i)} packages...`);
         await delay(BATCH_DELAY_MS);
       }
@@ -567,9 +572,11 @@ export async function handlePublish(options: PublishOptions): Promise<void> {
 
       while (retryCount <= MAX_RETRIES && !publishSuccess) {
         try {
-          if (retryCount > 0) {
+          if (retryCount > 0 && RETRY_DELAY_MS > 0) {
             console.log(`   🔄 Retry ${retryCount}/${MAX_RETRIES} after ${RETRY_DELAY_MS}ms...`);
             await delay(RETRY_DELAY_MS);
+          } else if (retryCount > 0) {
+            console.log(`   🔄 Retry ${retryCount}/${MAX_RETRIES}...`);
           }
 
           // Debug: Log access override logic only if DEBUG env var is set
