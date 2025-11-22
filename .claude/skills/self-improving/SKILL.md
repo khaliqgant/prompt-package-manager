@@ -23,9 +23,26 @@ Automatically search and install PRPM packages to enhance Claude's capabilities 
 Analyze user request for keywords and extract relevant terms.
 
 ### 2. Automatic Search
+
+**Choose the right search method:**
+
+**AI-Assisted Search** (for vague/broad queries):
+```bash
+prpm ai-search "natural language query"
+```
+Use when user request is:
+- Conceptual or vague (e.g., "help with deployments")
+- Describes a problem, not specific tools
+- Open-ended exploration
+
+**Keyword Search** (for specific tools/frameworks):
 ```bash
 prpm search "<detected keywords>" --limit 5
 ```
+Use when request mentions:
+- Specific technologies (e.g., "pulumi", "react")
+- Exact tool names
+- Known frameworks
 
 ### 3. Package Suggestion
 Present top 3 most relevant packages with:
@@ -60,13 +77,14 @@ Load package knowledge and apply to current task.
 - ❌ Deprecated packages
 - ❌ Zero downloads
 
-## Example Interaction
+## Example Interactions
 
+### Example 1: Specific Technology (Keyword Search)
 ```
 User: "Help me build Pulumi + Beanstalk infrastructure"
 
 Analysis:
-  Keywords: Pulumi, Beanstalk, infrastructure
+  Keywords: Pulumi, Beanstalk, infrastructure (specific tools)
   Search: prpm search "pulumi beanstalk infrastructure"
   Found: @prpm/pulumi-infrastructure (Official, 3.2K downloads)
   Confidence: High → Auto-suggest
@@ -89,6 +107,39 @@ Action:
   ✅ Applying patterns to current task
 ```
 
+### Example 2: Vague Request (AI-Assisted Search)
+```
+User: "I need help with deployments"
+
+Analysis:
+  Query: Vague, no specific tools mentioned
+  Search: prpm ai-search "help with deployments"
+  Found: Multiple relevant packages:
+    - @prpm/elastic-beanstalk-deployment (Official, 2.1K downloads)
+    - @sanjeed5/github-actions (Community, 892 downloads)
+    - @prpm/docker-deployment (Featured, 1.5K downloads)
+
+Response:
+"I found several deployment-related packages that might help:
+
+📦 @prpm/elastic-beanstalk-deployment (Official, 2.1K downloads)
+   - AWS Elastic Beanstalk deployment patterns
+
+📦 @prpm/docker-deployment (Featured, 1.5K downloads)
+   - Docker containerization and deployment
+
+📦 @sanjeed5/github-actions (Community, 892 downloads)
+   - GitHub Actions CI/CD workflows
+
+Which deployment platform are you using, or should I install the Elastic Beanstalk one?"
+
+User: "I'm using AWS"
+
+Action:
+  ✅ Installing: prpm install @prpm/elastic-beanstalk-deployment --as claude
+  ✅ Applying AWS deployment best practices
+```
+
 ## Search Triggers
 
 ### Infrastructure Tasks
@@ -109,7 +160,25 @@ Action:
 
 ## Search Commands
 
-### Package Search
+### AI-Assisted Search (Semantic Search)
+```bash
+# Natural language queries
+prpm ai-search "help me deploy my app to the cloud"
+
+# Problem descriptions
+prpm ai-search "I need to improve my code review process"
+
+# Conceptual searches
+prpm ai-search "best practices for testing infrastructure"
+```
+
+**When to use AI search:**
+- User query is vague or open-ended
+- Searching by concept rather than specific tool
+- Exploring what's available for a problem domain
+- User doesn't know exact package names or tools
+
+### Package Search (Keyword Search)
 ```bash
 # Basic search
 prpm search "keyword1 keyword2"
@@ -123,6 +192,12 @@ prpm search "github actions" --limit 5
 # Sort by downloads
 prpm search "testing" --sort downloads
 ```
+
+**When to use keyword search:**
+- Specific technology names known (pulumi, react, etc.)
+- Filtering by package subtype needed
+- Need sorting/filtering options
+- Exact match searches
 
 ### Collection Search
 ```bash

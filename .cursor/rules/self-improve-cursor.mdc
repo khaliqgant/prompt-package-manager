@@ -24,9 +24,26 @@ Automatically search and install PRPM packages to enhance Cursor's capabilities 
 Analyze user request for keywords and extract relevant terms.
 
 ### 2. Automatic Search
+
+**Choose the right search method:**
+
+**AI-Assisted Search** (for vague/broad queries):
+```bash
+prpm ai-search "natural language query"
+```
+Use when user request is:
+- Conceptual or vague (e.g., "help with deployments")
+- Describes a problem, not specific tools
+- Open-ended exploration
+
+**Keyword Search** (for specific tools/frameworks):
 ```bash
 prpm search "<detected keywords>" --limit 5
 ```
+Use when request mentions:
+- Specific technologies (e.g., "pulumi", "react")
+- Exact tool names
+- Known frameworks
 
 ### 3. Package Suggestion
 Present top 3 most relevant packages:
@@ -84,7 +101,25 @@ Load package knowledge and apply to current task.
 
 ## Search Commands
 
-### Package Search
+### AI-Assisted Search (Semantic Search)
+```bash
+# Natural language queries
+prpm ai-search "help me deploy my app to the cloud"
+
+# Problem descriptions
+prpm ai-search "I need to improve my code review process"
+
+# Conceptual searches
+prpm ai-search "best practices for testing infrastructure"
+```
+
+**When to use AI search:**
+- User query is vague or open-ended
+- Searching by concept rather than specific tool
+- Exploring what's available for a problem domain
+- User doesn't know exact package names or tools
+
+### Package Search (Keyword Search)
 ```bash
 # Basic search
 prpm search "keyword1 keyword2"
@@ -98,6 +133,12 @@ prpm search "github actions" --limit 5
 # Sort by downloads
 prpm search "testing" --sort downloads
 ```
+
+**When to use keyword search:**
+- Specific technology names known (pulumi, react, etc.)
+- Filtering by package subtype needed
+- Need sorting/filtering options
+- Exact match searches
 
 ### Collection Search
 ```bash
@@ -116,12 +157,13 @@ prpm install essential-dev-agents
 
 **Note:** Collections bundle multiple related packages together. Use collections when you need a complete toolkit for a specific domain (e.g., "startup-mvp", "security-review-agents", "essential-dev-agents").
 
-## Example
+## Examples
 
+### Specific Technology (Keyword Search)
 ```
 User: "Help me build Pulumi + Beanstalk infrastructure"
 
-Analysis: Keywords = Pulumi, Beanstalk, infrastructure
+Analysis: Keywords = Pulumi, Beanstalk, infrastructure (specific tools)
 Search: prpm search "pulumi beanstalk infrastructure"
 Found: @prpm/pulumi-infrastructure (Official, 3.2K downloads)
 Confidence: High → Auto-suggest
@@ -135,6 +177,29 @@ User: "Yes"
 
 Action: prpm install @prpm/pulumi-infrastructure --as cursor
 Result: Package loaded, applying Pulumi patterns to task
+```
+
+### Vague Request (AI-Assisted Search)
+```
+User: "I need help with deployments"
+
+Analysis: Query is vague, no specific tools mentioned
+Search: prpm ai-search "help with deployments"
+Found: Multiple relevant packages
+
+Response:
+"I found several deployment-related packages:
+
+1. @prpm/elastic-beanstalk-deployment (Official, 2.1K downloads)
+2. @prpm/docker-deployment (Featured, 1.5K downloads)
+3. @sanjeed5/github-actions (Community, 892 downloads)
+
+Which deployment platform are you using?"
+
+User: "I'm using AWS"
+
+Action: prpm install @prpm/elastic-beanstalk-deployment --as cursor
+Result: Package loaded, applying AWS deployment patterns
 ```
 
 Remember: Self-improvement through package discovery makes Cursor more capable for each task domain.
